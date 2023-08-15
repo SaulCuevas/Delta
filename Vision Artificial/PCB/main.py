@@ -61,7 +61,7 @@ def genImage(CAMFolder, top):
     putstr('. end\n')
 
     putstr('dumping ... ')
-    ctx.dump('board-top.png')
+    ctx.dump('Vision Artificial/PCB/board-top.png')
     putstr('end \n')
 
     ctx.clear()
@@ -86,11 +86,11 @@ def genImage(CAMFolder, top):
     putstr('. end\n')
 
     putstr('dumping bottom ...')
-    ctx.dump('board-bottom.png')
+    ctx.dump('Vision Artificial/PCB/board-bottom.png')
 
-    im = Image.open('board-bottom.png')
+    im = Image.open('Vision Artificial/PCB/board-bottom.png')
     im_mirror = ImageOps.mirror(im)
-    im_mirror.save('board-bottom.png', quality=100)
+    im_mirror.save('Vision Artificial/PCB/board-bottom.png', quality=100)
     putstr('. end\n')
 
     if top:
@@ -135,7 +135,7 @@ def genImage(CAMFolder, top):
         putstr('.')
     putstr(' end\n')
     putstr('dumping mask ...')
-    ctx.dump('board-mask.png')
+    ctx.dump('Vision Artificial/PCB/board-mask.png')
     putstr(' end\n')
 
 
@@ -216,8 +216,8 @@ def get_matched_coordinates(temp_img, map_img):
     plt.imshow(img3, 'gray'), plt.show()
 
     # result image path
-    cv2.imwrite(os.path.join(os.getcwd(), 'mask.jpg'), map_img)
-    cv2.imwrite(os.path.join(os.getcwd(), 'output.jpg'), img3)
+    cv2.imwrite(os.path.join(os.getcwd(), 'Vision Artificial/PCB/mask.jpg'), map_img)
+    cv2.imwrite(os.path.join(os.getcwd(), 'Vision Artificial/PCB/output.jpg'), img3)
 
     rot_deg = math.degrees(math.atan2((int(dst[1][0][0]) - int(dst[0][0][0])), (int(dst[1][0][1]) - int(dst[0][0][1]))))
 
@@ -240,9 +240,9 @@ if __name__ == "__main__":
                                initialdir='C:/Users/saulc/Downloads/SIFT_PCB')
 
     # read images
-    temp_img_gray = cv2.imread('board-mask.png', 0)
+    temp_img_gray = cv2.imread('Vision Artificial/PCB/board-mask.png', 0)
     map_img = cv2.imread(map_path)
-    cv2.imwrite('from.jpg', map_img)
+    cv2.imwrite('Vision Artificial/PCB/from.jpg', map_img)
 
     # image segmentation
     # """
