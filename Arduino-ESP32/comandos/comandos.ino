@@ -6,22 +6,22 @@
 /*           PINOUT ESP32 38 PINES
                _________________
  X      3.3V  |                 |GND        X
-        EN    |                 |GPIO23
- X      GPIO36|                 |GPIO22 SCL X
- X      GPIO39|                 |GPIO1      X
- X      GPIO34|                 |GPIO3      X
- X      GPIO35|                 |GPIO21 SDA X
+        EN    |                 |GPIO23     X
+ -      GPIO36|                 |GPIO22 SCL X
+ -      GPIO39|                 |GPIO1      -
+ -      GPIO34|                 |GPIO3      -
+ -      GPIO35|                 |GPIO21 SDA X
  X      GPIO32|                 |GND
  X      GPIO33|                 |GPIO19     X
  X      GPIO25|                 |GPIO18     X
  X      GPIO26|                 |GPIO5      X
  X      GPIO27|                 |GPIO17     X
  X      GPIO14|                 |GPIO16     X
- X      GPIO12|                 |GPIO4      X
-        GND   |                 |GPIO0      X
+ -      GPIO12|                 |GPIO4      X
+        GND   |                 |GPIO0      -
  X      GPIO13|                 |GPIO2      X
  -      GPIO9 |                 |GPIO15     X
- ~      GPIO10|                 |GPIO8      -
+ -      GPIO10|                 |GPIO8      -
  -      GPIO11|       ___       |GPIO7      -
         5V    |______||_||______|GPIO6      -
 */
@@ -41,26 +41,32 @@ const char separator = ' ';
 const int dataLength = 3;
 
 // Pines ESP32
-const int pinPWM[7] = {36, 35, 25, 14, 15,  4, 5};
-const int pinIN1[7] = {39, 32, 26, 12,  2, 16, 18} ;
-const int pinIN2[7] = {34, 33, 27, 13,  0, 17, 19};
-const int pinLIMIT_SW = 1;
-const int pin3_VIAS = 3;
+const int pinIN1[7] = {32, 25, 27, 15,  4, 17, 18} ;
+const int pinIN2[7] = {33, 26, 14,  2, 16,  5, 19};
+const int pinLIMIT_SW = 13;
+const int pin3_VIAS = 23;
 
 // Configuracion PWM ESP32
 const int PWMfreq = 1000; // 1 kHz
-const int PWMChannel0 = 0;
-const int PWMChannel1 = 0;
-const int PWMChannel2 = 0;
-const int PWMChannel3 = 0;
-const int PWMChannel4 = 0;
-const int PWMChannel5 = 0;
-const int PWMChannel6 = 0;
+const int PWMChannelIN1_0 = 0;
+const int PWMChannelIN2_0 = 1;
+const int PWMChannelIN1_1 = 2;
+const int PWMChannelIN2_1 = 3;
+const int PWMChannelIN1_2 = 4;
+const int PWMChannelIN2_2 = 5;
+const int PWMChannelIN1_3 = 6;
+const int PWMChannelIN2_3 = 7;
+const int PWMChannelIN1_4 = 8;
+const int PWMChannelIN2_4 = 9;
+const int PWMChannelIN1_5 = 10;
+const int PWMChannelIN2_5 = 11;
+const int PWMChannelIN1_6 = 12;
+const int PWMChannelIN2_6 = 13;
 const int PWMResolution = 16;
 const int MAX_DUTY_CYCLE = (int)(pow(2, PWMResolution)-1);
 
 // Parametros del motor
-const float ZONA_MUERTA = 30.0; // Porcentaje PWM en donde se vence la zona muerta
+const float ZONA_MUERTA = 20.0; // Porcentaje PWM en donde se vence la zona muerta
 
 // Variables globales
 float args[dataLength];
@@ -68,7 +74,6 @@ float SetPoints[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 float angulo[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 float PWMvalue[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 bool flag_mostrar_valores_PID = false;
-bool flag_control_M123 = false;
 bool flag_control_M1 = false;
 bool flag_control_M2 = false;
 bool flag_control_M3 = false;
@@ -91,14 +96,6 @@ float errorD[6];
 
 void setup() {
   // Se configuran los pines de salida
-  pinMode(pinPWM[0], OUTPUT);
-  pinMode(pinPWM[1], OUTPUT);
-  pinMode(pinPWM[2], OUTPUT);
-  pinMode(pinPWM[3], OUTPUT);
-  pinMode(pinPWM[4], OUTPUT);
-  pinMode(pinPWM[5], OUTPUT);
-  pinMode(pinPWM[6], OUTPUT);
-
   pinMode(pinIN1[0], OUTPUT);
   pinMode(pinIN1[1], OUTPUT);
   pinMode(pinIN1[2], OUTPUT);
@@ -119,22 +116,36 @@ void setup() {
   pinMode(pin3_VIAS, OUTPUT);
 
   // Se configuran los canales PWM para la ESP32
-  ledcSetup(PWMChannel0, PWMfreq, PWMResolution);
-  ledcSetup(PWMChannel1, PWMfreq, PWMResolution);
-  ledcSetup(PWMChannel2, PWMfreq, PWMResolution);
-  ledcSetup(PWMChannel3, PWMfreq, PWMResolution);
-  ledcSetup(PWMChannel4, PWMfreq, PWMResolution);
-  ledcSetup(PWMChannel5, PWMfreq, PWMResolution);
-  ledcSetup(PWMChannel6, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN1_0, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN2_0, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN1_1, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN2_1, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN1_2, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN2_2, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN1_3, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN2_3, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN1_4, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN2_4, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN1_5, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN2_5, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN1_6, PWMfreq, PWMResolution);
+  ledcSetup(PWMChannelIN2_6, PWMfreq, PWMResolution);
 
   // Se vinculan los canales PWM con los pines de salida
-  ledcAttachPin(pinPWM[0], PWMChannel0);
-  ledcAttachPin(pinPWM[1], PWMChannel1);
-  ledcAttachPin(pinPWM[2], PWMChannel2);
-  ledcAttachPin(pinPWM[3], PWMChannel3);
-  ledcAttachPin(pinPWM[4], PWMChannel4);
-  ledcAttachPin(pinPWM[5], PWMChannel5);
-  ledcAttachPin(pinPWM[6], PWMChannel6);
+  ledcAttachPin(pinIN1[0], PWMChannelIN1_0);
+  ledcAttachPin(pinIN2[0], PWMChannelIN2_0);
+  ledcAttachPin(pinIN1[1], PWMChannelIN1_1);
+  ledcAttachPin(pinIN2[1], PWMChannelIN2_1);
+  ledcAttachPin(pinIN1[2], PWMChannelIN1_2);
+  ledcAttachPin(pinIN2[2], PWMChannelIN2_2);
+  ledcAttachPin(pinIN1[3], PWMChannelIN1_3);
+  ledcAttachPin(pinIN2[3], PWMChannelIN2_3);
+  ledcAttachPin(pinIN1[4], PWMChannelIN1_4);
+  ledcAttachPin(pinIN2[4], PWMChannelIN2_4);
+  ledcAttachPin(pinIN1[5], PWMChannelIN1_5);
+  ledcAttachPin(pinIN2[5], PWMChannelIN2_5);
+  ledcAttachPin(pinIN1[6], PWMChannelIN1_6);
+  ledcAttachPin(pinIN2[6], PWMChannelIN2_6);
 
   Wire.begin();
   Serial.begin(115200);
@@ -144,140 +155,91 @@ void loop() {
   if(millis() - lastTime >= sampleTime){
     // Si una o mas banderas de control estan activadas, el robot
     // esta ocupado y no puede recibir una nueva instruccion
-    busy = flag_control_M123 | flag_control_M1 | flag_control_M2 | flag_control_M3 | flag_control_M4 | flag_control_M5 | flag_control_M6;
+    busy = flag_control_M1 | flag_control_M2 | flag_control_M3 | flag_control_M4 | flag_control_M5 | flag_control_M6;
     if (strComplete) {
       descifrar_comando();
       str = "";
       strComplete = false;
     }
-    // Control de los motores en conjunto del robot delta
-    if(flag_control_M123){
-      if(error[0]<error_min){
-          flag_control_M1 = false;
-          PWMvalue[0] = 0;
-          setMotor(PWMvalue[0], PWMChannel0, pinIN1[0], pinIN2[0]);
-          PCA9548A_cambio_direccion(0,0);
-        }
-      if(error[1]<error_min){
-          flag_control_M2 = false;
-          PWMvalue[1] = 0;
-          setMotor(PWMvalue[1], PWMChannel1, pinIN1[1], pinIN2[1]);
-          PCA9548A_cambio_direccion(0,0);
-        }
-      if(error[2]<error_min){
-          flag_control_M3 = false;
-          PWMvalue[2] = 0;
-          setMotor(PWMvalue[2], PWMChannel2, pinIN1[2], pinIN2[2]);
-          PCA9548A_cambio_direccion(0,0);
-        }
-      else{
-        if(flag_control_M1){
-          PCA9548A_cambio_direccion(0,1);
-          angulo[0] = leerMT6701();
-          PWMvalue[0] = calcularPID(0, SetPoints[0], angulo[0]);
-          setMotor(PWMvalue[0], PWMChannel0, pinIN1[0], pinIN2[0]);
-          }
-
-        if(flag_control_M2){
-          PCA9548A_cambio_direccion(1,1);
-          angulo[1] = leerMT6701();
-          PWMvalue[1] = calcularPID(1, SetPoints[1], angulo[1]);
-          setMotor(PWMvalue[1], PWMChannel1, pinIN1[1], pinIN2[1]);
-          }
-
-        if(flag_control_M3){
-          PCA9548A_cambio_direccion(2,1);
-          angulo[2] = leerMT6701();
-          PWMvalue[2] = calcularPID(2, SetPoints[2], angulo[2]);
-          setMotor(PWMvalue[2], PWMChannel2, pinIN1[2], pinIN2[2]);
-          }
-        }
-      }
     // Control individual de cada motor
-    else{
-      if(flag_control_M1){
-        if(error[0]<error_min){
-          flag_control_M1 = false;
-          PWMvalue[0] = 0;
-          setMotor(PWMvalue[0], PWMChannel0, pinIN1[0], pinIN2[0]);
-          PCA9548A_cambio_direccion(0,0);
-        }
-        else{
-          angulo[0] = leerMT6701();
-          PWMvalue[0] = calcularPID(0, SetPoints[0], angulo[0]);
-          setMotor(PWMvalue[0], PWMChannel0, pinIN1[0], pinIN2[0]);
-        }
+    if(flag_control_M1){
+      PCA9548A_cambio_direccion(0,1);
+      angulo[0] = leerMT6701();
+      PWMvalue[0] = calcularPID(0, SetPoints[0], angulo[0]);
+      if(abs(error[0])<error_min){
+        PWMvalue[0] = 0.0;
+        setMotor(0.0, PWMChannelIN1_0, PWMChannelIN2_0);
+        PCA9548A_cambio_direccion(0,0);
+        flag_control_M1 = false;
       }
-      if(flag_control_M2){
-        if(error[1]<error_min){
-          flag_control_M2 = false;
-          PWMvalue[1] = 0;
-          setMotor(PWMvalue[1], PWMChannel1, pinIN1[1], pinIN2[1]);
-          PCA9548A_cambio_direccion(0,0);
-        }
-        else{
-          angulo[1] = leerMT6701();
-          PWMvalue[1] = calcularPID(1, SetPoints[1], angulo[1]);
-          setMotor(PWMvalue[1], PWMChannel1, pinIN1[1], pinIN2[1]);
-        }
+      else setMotor(PWMvalue[0], PWMChannelIN1_0, PWMChannelIN2_0);
+    }
+    if(flag_control_M2){
+      PCA9548A_cambio_direccion(1,1);
+      angulo[1] = leerMT6701();
+      PWMvalue[1] = calcularPID(1, SetPoints[1], angulo[1]);
+      if(abs(error[1])<error_min){
+        PWMvalue[1] = 0.0;
+        setMotor(0.0, PWMChannelIN1_1, PWMChannelIN2_1);
+        PCA9548A_cambio_direccion(0,0);
+        flag_control_M2 = false;
       }
-      if(flag_control_M3){
-        if(error[2]<error_min){
-          flag_control_M3 = false;
-          PWMvalue[2] = 0;
-          setMotor(PWMvalue[2], PWMChannel2, pinIN1[2], pinIN2[2]);
-          PCA9548A_cambio_direccion(0,0);
-        }
-        else{
-          angulo[2] = leerMT6701();
-          PWMvalue[2] = calcularPID(2, SetPoints[2], angulo[2]);
-          setMotor(PWMvalue[2], PWMChannel2, pinIN1[2], pinIN2[2]);
-        }
+      else setMotor(PWMvalue[1], PWMChannelIN1_1, PWMChannelIN2_1);
+    }
+    if(flag_control_M3){
+      PCA9548A_cambio_direccion(2,1);
+      angulo[2] = leerMT6701();
+      PWMvalue[2] = calcularPID(2, SetPoints[2], angulo[2]);
+      if(abs(error[2])<error_min){
+        PWMvalue[2] = 0.0;
+        setMotor(0.0, PWMChannelIN1_2, PWMChannelIN2_2);
+        PCA9548A_cambio_direccion(0,0);
+        flag_control_M3 = false;
       }
-      if(flag_control_M4){
-        angulo[3] = leerMT6701();
-        PWMvalue[3] = calcularPID(3, SetPoints[3], angulo[3]);
-        if(abs(error[3])<error_min){
-          PWMvalue[3] = 0.0;
-          setMotor(0.0, PWMChannel3, pinIN1[3], pinIN2[3]);
-          PCA9548A_cambio_direccion(0,0);
-          flag_control_M4 = false;
-        }
-        else setMotor(PWMvalue[3], PWMChannel3, pinIN1[3], pinIN2[3]);
+      else setMotor(PWMvalue[2], PWMChannelIN1_2, PWMChannelIN2_2);
+    }
+    if(flag_control_M4){
+      PCA9548A_cambio_direccion(3,1);
+      angulo[3] = leerMT6701();
+      PWMvalue[3] = calcularPID(3, SetPoints[3], angulo[3]);
+      if(abs(error[3])<error_min){
+        PWMvalue[3] = 0.0;
+        setMotor(0.0, PWMChannelIN1_3, PWMChannelIN2_3);
+        PCA9548A_cambio_direccion(0,0);
+        flag_control_M4 = false;
       }
-      if(flag_control_M5){
-        if(error[4]<error_min){
-          flag_control_M5 = false;
-          PWMvalue[4] = 0;
-          setMotor(PWMvalue[4], PWMChannel4, pinIN1[4], pinIN2[4]);
-          PCA9548A_cambio_direccion(0,0);
-        }
-        else{
-          angulo[4] = leerMT6701();
-          PWMvalue[4] = calcularPID(4, SetPoints[4], angulo[4]);
-          setMotor(PWMvalue[4], PWMChannel4, pinIN1[4], pinIN2[4]);
-        }
+      else setMotor(PWMvalue[3], PWMChannelIN1_3, PWMChannelIN2_3);
+    }
+    if(flag_control_M5){
+      PCA9548A_cambio_direccion(4,1);
+      angulo[4] = leerMT6701();
+      PWMvalue[4] = calcularPID(4, SetPoints[4], angulo[4]);
+      if(abs(error[4])<error_min){
+        PWMvalue[4] = 0.0;
+        setMotor(0.0, PWMChannelIN1_4, PWMChannelIN2_4);
+        PCA9548A_cambio_direccion(0,0);
+        flag_control_M5 = false;
       }
-      if(flag_control_M6){
-        if(error[5]<error_min){
-          flag_control_M6 = false;
-          PWMvalue[5] = 0;
-          setMotor(PWMvalue[5], PWMChannel5, pinIN1[5], pinIN2[5]);
-          PCA9548A_cambio_direccion(0,0);
-        }
-        else{
-          angulo[5] = leerMT6701();
-          PWMvalue[5] = calcularPID(5, SetPoints[5], angulo[5]);
-          setMotor(PWMvalue[5], PWMChannel5, pinIN1[5], pinIN2[5]);
-        }
+      else setMotor(PWMvalue[4], PWMChannelIN1_4, PWMChannelIN2_4);
+    }
+    if(flag_control_M6){
+      PCA9548A_cambio_direccion(5,1);
+      angulo[5] = leerMT6701();
+      PWMvalue[5] = calcularPID(5, SetPoints[5], angulo[5]);
+      if(abs(error[5])<error_min){
+        PWMvalue[5] = 0.0;
+        setMotor(0.0, PWMChannelIN1_5, PWMChannelIN2_5);
+        PCA9548A_cambio_direccion(0,0);
+        flag_control_M6 = false;
       }
+      else setMotor(PWMvalue[5], PWMChannelIN1_5, PWMChannelIN2_5);
     }
     // Muestra los valores para monitorear el comportamiento del PID
     if(flag_mostrar_valores_PID){
-      Serial.print("PosRef:"); Serial.print(SetPoints[3]); Serial.print(",");
-      Serial.print("Pos:"); Serial.print(angulo[3]); Serial.print(",");
-      Serial.print("Error:"); Serial.print(error[3]); Serial.print(",");
-      Serial.print("PID:"); Serial.println(PWMvalue[3]);
+      Serial.print("PosRef:"); Serial.print(SetPoints[0]); Serial.print(",");
+      Serial.print("Pos:"); Serial.print(angulo[0]); Serial.print(",");
+      Serial.print("Error:"); Serial.print(error[0]); Serial.print(",");
+      Serial.print("PID:"); Serial.println(PWMvalue[0]);
     }
     lastTime = millis();
   }
@@ -323,35 +285,33 @@ void descifrar_comando(){
       //Serial.print("Quieres mover el motor "), Serial.println(comm2.toInt());
       switch(comm2.toInt()) {
         case 123:
+          flag_control_M1 = true;
+          SetPoints[0] = args[0];
+          SetPoints[1] = args[1];
+          SetPoints[2] = args[2];
           break;
         case 1:
           flag_control_M1 = true;
-          PCA9548A_cambio_direccion(0,1);
           SetPoints[0] = args[0];
           break;
         case 2:
           flag_control_M2 = true;
-          PCA9548A_cambio_direccion(1,1);
           SetPoints[1] = args[0];
           break;
         case 3:
           flag_control_M3 = true;
-          PCA9548A_cambio_direccion(2,1);
           SetPoints[2] = args[0];
           break;
         case 4:
           flag_control_M4 = true;
-          PCA9548A_cambio_direccion(3,1);
           SetPoints[3] = args[0];
           break;
         case 5:
           flag_control_M5 = true;
-          PCA9548A_cambio_direccion(4,1);
           SetPoints[4] = args[0];
           break;
         case 6:
           flag_control_M6 = true;
-          PCA9548A_cambio_direccion(5,1);
           SetPoints[5] = args[0];
           break;
         case 7:
@@ -392,6 +352,23 @@ void descifrar_comando(){
     case 'X':
       if( comm2.toInt() ) flag_mostrar_valores_PID = true;
       else flag_mostrar_valores_PID = false;
+      break;
+    // STOP
+    case '-':
+      setMotor(0.0, PWMChannelIN1_0, PWMChannelIN2_0);
+      setMotor(0.0, PWMChannelIN1_1, PWMChannelIN2_1);
+      setMotor(0.0, PWMChannelIN1_2, PWMChannelIN2_2);
+      setMotor(0.0, PWMChannelIN1_3, PWMChannelIN2_3);
+      setMotor(0.0, PWMChannelIN1_4, PWMChannelIN2_4);
+      setMotor(0.0, PWMChannelIN1_5, PWMChannelIN2_5);
+      setMotor(0.0, PWMChannelIN1_6, PWMChannelIN2_6);
+
+      flag_control_M1 = false;
+      flag_control_M2 = false;
+      flag_control_M3 = false;
+      flag_control_M4 = false;
+      flag_control_M5 = false;
+      flag_control_M6 = false;
       break;
     default:
       Serial.println("No reconozco ese comando");
@@ -444,19 +421,17 @@ float calcularPID(int motor, float setpoint, float input){
 }
 
 // Configuracion del motor
-void setMotor(float valPWM, int channelPWM, int IN1, int IN2){
+void setMotor(float valPWM, int IN1, int IN2){
   bool dir = true;
-  if(valPWM==0) ledcWrite(channelPWM, 0), digitalWrite(IN1, LOW), digitalWrite(IN2, LOW);
+  if(valPWM==0) ledcWrite(IN1, 0), ledcWrite(IN2, 0);
   else {
     if(valPWM<0) dir = false;
     valPWM = abs(valPWM);
     if(valPWM>100) valPWM = 100;
     if(valPWM<ZONA_MUERTA) valPWM = ZONA_MUERTA;
     int dutyCycle = map(valPWM, 0, 100, 0, MAX_DUTY_CYCLE);
-    ledcWrite(channelPWM, dutyCycle);
-    //analogWrite(channelPWM, dutyCycle);
     // dir : true = ccw, false = cw
-    if(dir) digitalWrite(IN1, HIGH), digitalWrite(IN2, LOW);
-    else digitalWrite(IN1, LOW), digitalWrite(IN2, HIGH);
+    if(dir) ledcWrite(IN1, dutyCycle), ledcWrite(IN2, 0);
+    else ledcWrite(IN1, 0), ledcWrite(IN2, dutyCycle);
   }
 }
