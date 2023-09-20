@@ -1,0 +1,57 @@
+ 
+ 
+    @font-face {
+        font-family: "Edwardian Script ITC";
+        src: url("ITCEDSCR.TTF") format('truetype');
+        font-style: normal;
+        font-weight: normal;
+    }
+    
+    @font-face {
+        font-family: "Monotype Corsiva";
+        src: url("MTCORSVA.TTF") format('truetype');
+        font-style: normal;
+        font-weight: normal;
+    }
+    
+    @font-face {
+        font-family: "Bauhaus 93";
+        src: url("BAUHS93.TTF") format('truetype');
+        font-style: normal;
+        font-weight: normal;
+    }
+    
+    @font-face {
+        font-family: "Comic Sans MS";
+        src: url("comic.ttf") format('truetype');
+        font-style: normal;
+        font-weight: normal;
+    }
+
+    @font-face {
+        font-family: "HW 1989";
+        src: url("/fonts/FromWhereYouAre.ttf") format('truetype'),
+             url("C:/Users/Spect/OneDrive/Escritorio/WEB_DELTA/fonts/FromWhereYouAre.ttf") format('truetype');
+        font-style: normal;
+        font-weight: normal;
+    }
+ 
+/* HEADER */
+    #header{
+        font-family: "Monotype Corsiva";
+        font-size: 60px;
+        color: white;
+        text-align: center;
+        background: linear-gradient(to bottom,#006ae4 0%,#00d1d8 100%);
+    }
+    
+    #home{
+        font-family: "HW 1989";
+    }
+
+    #navK{
+        font-family: "HW 1989";
+        font-size: 10px;
+    }
+
+    
