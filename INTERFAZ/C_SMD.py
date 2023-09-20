@@ -40,8 +40,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QCheckBox,
     QDoubleSpinBox)
-import matplotlib
-matplotlib.use('Qt5Agg')
+
 
 
 class SMD(QWidget):
@@ -67,7 +66,7 @@ class SMD(QWidget):
         self.lbl = QLabel()
         self.lbl.setPixmap(im)
         main_layout.addWidget(self.lbl, alignment = Qt.AlignCenter)
-        
+                
         
         # Button 01: Inicio de programa
         self.btn_start = QPushButton("Volver")

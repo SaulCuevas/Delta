@@ -20,26 +20,15 @@ Descripción:
 @author: Spect
 """
 
-import sys
-from PyQt5.QtCore import Qt,QTimer
-# import PyQt5.QtGui as pyGui
+from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtGui import QPixmap, QFont
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 from PyQt5.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QHBoxLayout,
+    # QHBoxLayout,
     QVBoxLayout,
     QLabel,
     QWidget,
-    QSpinBox,
-    QComboBox,
-    QPushButton,
-    QMessageBox,
-    QFileDialog,
-    QTabWidget,
-    QLineEdit,
-    QCheckBox,
-    QDoubleSpinBox)
+    QPushButton)
 import matplotlib
 matplotlib.use('Qt5Agg')
 
@@ -61,13 +50,17 @@ class TUTORIAL(QWidget):
         lbl_tutorial.setFixedSize(w, h)
         main_layout.addWidget(lbl_tutorial, alignment = Qt.AlignCenter)
 
-        # Label 01: Imagen Bienvenida
-        im = QPixmap("imagenes/delta.jpg")
-        im = im.scaled(400, 400, Qt.KeepAspectRatio)
-        self.lbl = QLabel()
-        self.lbl.setPixmap(im)
-        main_layout.addWidget(self.lbl, alignment = Qt.AlignCenter)
+        # # Label 01: Imagen Bienvenida
+        # im = QPixmap("imagenes/delta.jpg")
+        # im = im.scaled(400, 400, Qt.KeepAspectRatio)
+        # self.lbl = QLabel()
+        # self.lbl.setPixmap(im)
+        # main_layout.addWidget(self.lbl, alignment = Qt.AlignCenter)
         
+        # Widget para el navegador
+        self.webview = QWebEngineView()
+        self.webview.setUrl(QUrl("https://www.recursospython.com/"))
+        main_layout.addWidget(self.webview, alignment = Qt.AlignCenter)
         
         # Button 01: Inicio de programa
         self.btn_start = QPushButton("Volver")

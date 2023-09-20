@@ -44,6 +44,7 @@ class INICIO(QWidget):
         im = im.scaled(400, 400, Qt.KeepAspectRatio)
         self.lbl = QLabel()
         self.lbl.setPixmap(im)
+        self.lbl.adjustSize()
         main_layout.addWidget(self.lbl, alignment = Qt.AlignCenter)
         
         
@@ -73,6 +74,6 @@ class INICIO(QWidget):
         self.btn_start.setFixedSize(w, h)
         main_layout.addWidget(self.btn_start, alignment = Qt.AlignCenter)
         
-        
+        # self.setStyleSheet("border: 1px solid black; background-color: lightgreen")
         self.setLayout(main_layout)
         

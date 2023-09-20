@@ -31,9 +31,11 @@ import D_ESTADISTICAS as statistics
 import E_COMENZAR as comenzar
 
 import PyQt5.QtGui as pyGui
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QApplication,
+    QDesktopWidget,
     QMainWindow)
 
 
@@ -46,12 +48,31 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(pyGui.QIcon('delta.jpg'))
         # self.setFixedSize(1024, 600)
         self.setWindowFlag(Qt.FramelessWindowHint)
+        # self.widget = QWidget()
+        # self.main_layout = QHBoxLayout()
+        # self.widget.setLayout(self.main_layout)
+        # self.widget.setStyleSheet("border: 1px solid black; background-color: lightgreen")
+        # self.setCentralWidget(self.widget)
+        # self.setStyleSheet("background-color: lavender;")
+        
+        # w = self.frameGeometry().width()
+        # print(w)
+        # h = self.frameGeometry().height()
+        # print(h)
+        
+        # w1 = QDesktopWidget().screenGeometry().width()
+        # print(w1)
+        # h1 = QDesktopWidget().screenGeometry().height()
+        # print(h1)
+        
+        # self.startTUTORIAL()
         self.startINICIO()
         
 # -----------------------------------------------------------------------------
 
     def startINICIO(self):
         self.INICIO = inicio.INICIO()
+        # self.main_layout.addWidget(self.INICIO)
         self.setCentralWidget(self.INICIO)
         self.INICIO.btn_start.clicked.connect(self.startMENU)
         self.show()
