@@ -155,13 +155,18 @@ void loop() {
   if(millis() - lastTime >= sampleTime){
     // Si una o mas banderas de control estan activadas, el robot
     // esta ocupado y no puede recibir una nueva instruccion
+    lastbusy = busy;
     busy = flag_control_M1 | flag_control_M2 | flag_control_M3 | flag_control_M4 | flag_control_M5 | flag_control_M6;
+    if ( (busy ~= lastbusy) & ~busy ){
+      Serial.println("ready");
+    }
     if (strComplete) {
       descifrar_comando();
       str = "";
       strComplete = false;
     }
     // Control individual de cada motor
+    // Motor Delta 1
     if(flag_control_M1){
       PCA9548A_cambio_direccion(0,1);
       angulo[0] = leerMT6701();
@@ -174,6 +179,7 @@ void loop() {
       }
       else setMotor(PWMvalue[0], PWMChannelIN1_0, PWMChannelIN2_0);
     }
+    // Motor Delta 2
     if(flag_control_M2){
       PCA9548A_cambio_direccion(1,1);
       angulo[1] = leerMT6701();
@@ -186,6 +192,7 @@ void loop() {
       }
       else setMotor(PWMvalue[1], PWMChannelIN1_1, PWMChannelIN2_1);
     }
+    // Motor Delta 3
     if(flag_control_M3){
       PCA9548A_cambio_direccion(2,1);
       angulo[2] = leerMT6701();
@@ -198,6 +205,7 @@ void loop() {
       }
       else setMotor(PWMvalue[2], PWMChannelIN1_2, PWMChannelIN2_2);
     }
+    // Motor Manipulador
     if(flag_control_M4){
       PCA9548A_cambio_direccion(3,1);
       angulo[3] = leerMT6701();
@@ -210,7 +218,10 @@ void loop() {
       }
       else setMotor(PWMvalue[3], PWMChannelIN1_3, PWMChannelIN2_3);
     }
+    // Motor Dispensador
     if(flag_control_M5){
+      // Falta mandar el pulso
+      /*
       PCA9548A_cambio_direccion(4,1);
       angulo[4] = leerMT6701();
       PWMvalue[4] = calcularPID(4, SetPoints[4], angulo[4]);
@@ -221,7 +232,10 @@ void loop() {
         flag_control_M5 = false;
       }
       else setMotor(PWMvalue[4], PWMChannelIN1_4, PWMChannelIN2_4);
+      */
+      flag_control_M5 = false;
     }
+    // Motor cambio de Herramienta
     if(flag_control_M6){
       PCA9548A_cambio_direccion(5,1);
       angulo[5] = leerMT6701();
@@ -233,6 +247,19 @@ void loop() {
         flag_control_M6 = false;
       }
       else setMotor(PWMvalue[5], PWMChannelIN1_5, PWMChannelIN2_5);
+    }
+    // Motor Inventario
+    if(flag_control_M7){
+      PCA9548A_cambio_direccion(6,1);
+      angulo[6] = leerMT6701();
+      PWMvalue[6] = calcularPID(6, SetPoints[6], angulo[6]);
+      if(abs(error[6])<error_min){
+        PWMvalue[6] = 0.0;
+        setMotor(0.0, PWMChannelIN1_6, PWMChannelIN2_6);
+        PCA9548A_cambio_direccion(0,0);
+        flag_control_M7 = false;
+      }
+      else setMotor(PWMvalue[6], PWMChannelIN1_6, PWMChannelIN2_6);
     }
     // Muestra los valores para monitorear el comportamiento del PID
     if(flag_mostrar_valores_PID){
