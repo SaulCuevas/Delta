@@ -120,7 +120,7 @@ def genImage(CAMFolder, top):
         putstr('.')
         ctx.render_layer(mask, settings=metal_settings, bgsettings=bg_settings)
         putstr('.')
-        ctx.render_layer(silk, settings=RenderSettings(color=(1, 1, 1), mirror=False))
+        # ctx.render_layer(silk, settings=RenderSettings(color=(1, 1, 1), mirror=False))
         putstr('.')
         ctx.render_layer(drill, settings=RenderSettings(mirror=False))
         putstr('.')
@@ -135,7 +135,7 @@ def genImage(CAMFolder, top):
         putstr('.')
         ctx.render_layer(mask, settings=metal_settings, bgsettings=bg_settings)
         putstr('.')
-        ctx.render_layer(silk, settings=RenderSettings(color=(1, 1, 1), mirror=True))
+        # ctx.render_layer(silk, settings=RenderSettings(color=(1, 1, 1), mirror=True))
         putstr('.')
         ctx.render_layer(drill, settings=RenderSettings(mirror=True))
         putstr('.')
@@ -143,9 +143,9 @@ def genImage(CAMFolder, top):
     putstr('dumping mask ...')
     ctx.dump('Vision Artificial/PCB/board-mask.png')
     putstr(' end\n')
-    # im = cv2.imread('Vision Artificial/PCB/board-mask.png')
-    # edged = cv2.Canny(im, 30, 200)
-    # cv2.imwrite('Vision Artificial/PCB/board-mask.png', edged)
+    im = cv2.imread('Vision Artificial/PCB/board-mask.png')
+    edged = cv2.Canny(im, 30, 200)
+    cv2.imwrite('Vision Artificial/PCB/board-mask.png', edged)
 
 def get_matched_coordinates(temp_img, map_img):
     """
@@ -205,11 +205,14 @@ def get_matched_coordinates(temp_img, map_img):
 
         map_img = cv2.polylines(
             map_img, [np.int32(dst)], True, 255, 3, cv2.LINE_AA)
+        rot_deg = math.degrees(math.atan2((int(dst[1][0][0]) - int(dst[0][0][0])), (int(dst[1][0][1]) - int(dst[0][0][1]))))
 
     else:
         print("Not enough matches are found - %d/%d" %
               (len(good), MIN_MATCH_COUNT))
         matchesMask = None
+        dst = 0
+        rot_deg = 0
 
     draw_params = dict(matchColor=(0, 255, 0),  # draw matches in green color
                        singlePointColor=None,
@@ -226,8 +229,6 @@ def get_matched_coordinates(temp_img, map_img):
     # result image path
     cv2.imwrite(os.path.join(os.getcwd(), 'Vision Artificial/PCB/mask.jpg'), map_img)
     cv2.imwrite(os.path.join(os.getcwd(), 'Vision Artificial/PCB/output.jpg'), img3)
-
-    rot_deg = math.degrees(math.atan2((int(dst[1][0][0]) - int(dst[0][0][0])), (int(dst[1][0][1]) - int(dst[0][0][1]))))
 
     return dst, rot_deg
 
@@ -248,7 +249,7 @@ if __name__ == "__main__":
 
     # read images
     temp_img_gray = cv2.imread('Vision Artificial/PCB/board-mask.png', 0)
-    map_img = cv2.imread('Vision Artificial/PCB/PruebaEjemploDigital/Imagenes/PCB girada.png')
+    map_img = cv2.imread('Vision Artificial/PCB/PruebaEjemploDigital/Imagenes/Arduino_MEGA2560.png')
     cv2.imwrite('Vision Articial/PCB/from.jpg', map_img)
 
     # image segmentation
@@ -265,7 +266,7 @@ if __name__ == "__main__":
 
     # equalize histograms
     temp_img_eq = cv2.equalizeHist(temp_img_gray)
-    map_img_eq = cv2.equalizeHist(mask)
+    map_img_eq = cv2.equalizeHist(edged)
 
     # calculate matched coordinates
     coords, grados_rot = get_matched_coordinates(temp_img_eq, map_img_eq)
