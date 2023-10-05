@@ -143,9 +143,9 @@ def genImage(CAMFolder, top):
     putstr('dumping mask ...')
     ctx.dump('Vision Artificial/PCB/board-mask.png')
     putstr(' end\n')
-    im = cv2.imread('Vision Artificial/PCB/board-mask.png')
-    edged = cv2.Canny(im, 30, 200)
-    cv2.imwrite('Vision Artificial/PCB/board-mask.png', edged)
+    # im = cv2.imread('Vision Artificial/PCB/board-mask.png')
+    # edged = cv2.Canny(im, 30, 200)
+    # cv2.imwrite('Vision Artificial/PCB/board-mask.png', edged)
 
 def get_matched_coordinates(temp_img, map_img):
     """
@@ -249,7 +249,7 @@ if __name__ == "__main__":
 
     # read images
     temp_img_gray = cv2.imread('Vision Artificial/PCB/board-mask.png', 0)
-    map_img = cv2.imread('Vision Artificial/PCB/PruebaEjemploDigital/Imagenes/Arduino_MEGA2560.png')
+    map_img = cv2.imread('Vision Artificial/PCB/PruebaEjemploDigital/Imagenes/Arduino_MEGA2560_SM.png')
     cv2.imwrite('Vision Articial/PCB/from.jpg', map_img)
 
     # image segmentation
@@ -266,7 +266,7 @@ if __name__ == "__main__":
 
     # equalize histograms
     temp_img_eq = cv2.equalizeHist(temp_img_gray)
-    map_img_eq = cv2.equalizeHist(edged)
+    map_img_eq = cv2.equalizeHist(mask)
 
     # calculate matched coordinates
     coords, grados_rot = get_matched_coordinates(temp_img_eq, map_img_eq)

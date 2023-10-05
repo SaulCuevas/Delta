@@ -1,5 +1,6 @@
 import math
 
+import csv
 import gerber
 import numpy as np
 import cv2
@@ -39,8 +40,14 @@ for prim in copper.primitives:
     #     print(prim)
     pos = (prim.bounding_box[0][0] + (prim.bounding_box[0][1] - prim.bounding_box[0][0]) / 2,
            prim.bounding_box[1][0] + (prim.bounding_box[1][1] - prim.bounding_box[1][0]) / 2)
-    area_sqr = math.sqrt(prim.bounding_box[0][1] - prim.bounding_box[0][0]) * (prim.bounding_box[1][1] - prim.bounding_box[1][0])
+    area_sqr = math.sqrt(math.sqrt(prim.bounding_box[0][1] - prim.bounding_box[0][0]) * (prim.bounding_box[1][1] - prim.bounding_box[1][0]))
     soldadura_lista.append(soldadura_class(round(pos[0], 4), round(pos[1], 4), area_sqr))
 
 for x in soldadura_lista:
     print(x.x, x.y, x.cantidad)
+
+with open('test.csv', 'w') as f:
+    write = csv.writer(f)
+    write.writerow(["X", "Y", "CANTIDAD"])
+    for obj in soldadura_lista:
+        write.writerow([obj.x, obj.y, obj.cantidad])
