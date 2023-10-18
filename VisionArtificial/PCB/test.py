@@ -2,12 +2,6 @@ import interprete_gerber
 
 from tkinter.filedialog import askdirectory
 
-class soldadura_class:
-    def __init__(self, x, y, cantidad) -> None:
-        self.x = x
-        self.y = y
-        self.cantidad = cantidad
-
 path = askdirectory(title='Abrir carpeta con archivo de soldadura')
 
 top_bottom = input('¿Es top layer? (Y/N) ')

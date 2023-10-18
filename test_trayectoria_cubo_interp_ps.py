@@ -1,7 +1,7 @@
 from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
-from fun.Trayectorias import *
+from Control.fun.Trayectorias import *
 import time
 start_time = time.time()
 

@@ -34,12 +34,13 @@
             "use_teamhub_location": false
         },
         {
-            "filename_prefix": "CAMOutputs/GerberFiles",
+            "filename_prefix": "GerberFiles",
             "format_specifier": {
                 "decimal": 4,
                 "integer": 3
             },
             "generate_job_file": true,
+            "gerber_job_filepath": "%TEAMHUBNAME/%PROJECTNAME/%PREFIX/gerber_job.gbrjob",
             "output_type": "gerber",
             "outputs": [
                 {
@@ -247,6 +248,36 @@
                     "name": "Silkscreen Bottom",
                     "polarity": "positive",
                     "type": "gerber_layer"
+                },
+                {
+                    "board_outline": false,
+                    "config": {
+                        "description": "Revela capas de cobre de los pads",
+                        "file_function": "Other"
+                    },
+                    "filename_format": "%N/pads_top.gbr",
+                    "layers": [
+                        29
+                    ],
+                    "milling": false,
+                    "name": "Pads Top",
+                    "polarity": "positive",
+                    "type": "gerber_layer"
+                },
+                {
+                    "board_outline": false,
+                    "config": {
+                        "description": "Revela capas de cobre de los pads",
+                        "file_function": "Other"
+                    },
+                    "filename_format": "%N/pads_bottom.gbr",
+                    "layers": [
+                        30
+                    ],
+                    "milling": false,
+                    "name": "Pads Bottom",
+                    "polarity": "positive",
+                    "type": "gerber_layer"
                 }
             ],
             "version": "RS274X"
@@ -263,7 +294,7 @@
             "pdf_filename": "%N"
         },
         {
-            "filename_prefix": "CAMOutputs/DrillFiles",
+            "filename_prefix": "DrillFiles",
             "format_specifier": {
                 "decimal": 3,
                 "integer": 3
@@ -285,21 +316,14 @@
             ]
         },
         {
-            "filename_prefix": "CAMOutputs/Assembly",
+            "filename_prefix": "Assembly",
             "output_type": "assembly",
             "outputs": [
                 {
-                    "filename_format": "%N/%N",
-                    "list_attribute": true,
-                    "list_type": "values",
-                    "name": "Bill of Material",
-                    "output_format": "txt",
-                    "type": "bom"
-                },
-                {
                     "filename_format": "%N/PnP_%N_%BOARDSIDE",
+                    "header": true,
                     "name": "Pick and Place",
-                    "output_format": "txt",
+                    "output_format": "csv",
                     "type": "pick_and_place"
                 }
             ]
@@ -311,7 +335,7 @@
             ]
         }
     ],
-    "timestamp": "2023-10-03T10:28:49",
+    "timestamp": "2023-10-15T15:43:59",
     "type": "Fusion 360 Electronics CAM job",
     "units": "metric",
     "version": "9.2.0"

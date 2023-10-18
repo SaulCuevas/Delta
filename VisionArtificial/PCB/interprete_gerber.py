@@ -110,7 +110,7 @@ def genImage(CAMFolder : str, top : bool):
 
     ctx.render_layer(drill)
 
-    ctx.dump('Vision Artificial/PCB/board-top.png')
+    ctx.dump('VisionArtificial/PCB/board-top.png')
 
     ctx.clear()
     print("Cargando archivos de capa inferior...") # Convertir en cuadro de dialogo en PyQt (round progress bar)
@@ -125,11 +125,11 @@ def genImage(CAMFolder : str, top : bool):
     ctx.render_layer(silk, settings=our_settings)
     ctx.render_layer(drill)
 
-    ctx.dump('Vision Artificial/PCB/board-bottom.png')
+    ctx.dump('VisionArtificial/PCB/board-bottom.png')
 
-    im = Image.open('Vision Artificial/PCB/board-bottom.png')
+    im = Image.open('VisionArtificial/PCB/board-bottom.png')
     im_mirror = ImageOps.mirror(im)
-    im_mirror.save('Vision Artificial/PCB/board-bottom.png', quality=100)
+    im_mirror.save('VisionArtificial/PCB/board-bottom.png', quality=100)
 
     print("Generando máscara para detección de PCB...") # Convertir en cuadro de dialogo en PyQt (round progress bar)
     if top:
@@ -155,14 +155,14 @@ def genImage(CAMFolder : str, top : bool):
         ctx.render_layer(outline, settings=RenderSettings(color=(0, 0, 0), mirror=True), bgsettings=bg_settings)
         ctx.render_layer(mask, settings=metal_settings, bgsettings=bg_settings)
         ctx.render_layer(drill, settings=RenderSettings(mirror=True))
-    ctx.dump('Vision Artificial/PCB/board-mask.png')
+    ctx.dump('VisionArtificial/PCB/board-mask.png')
 
 def genImageList(CAMFolder : str, _top_bottom : bool):
     pnp = obtener_pnp(CAMFolder, _top_bottom)
     if(_top_bottom):
-        img_path = "Vision Artificial/PCB/board-top.png"
+        img_path = "VisionArtificial/PCB/board-top.png"
     else:
-        img_path = "Vision Artificial/PCB/board-bottom.png"
+        img_path = "VisionArtificial/PCB/board-bottom.png"
     img = Image.open(img_path)
     w , h = img.size
     I1 = ImageDraw.Draw(img)
@@ -177,4 +177,4 @@ def genImageList(CAMFolder : str, _top_bottom : bool):
             I1.rectangle(bbox, fill='white')
             I1.text((w-float(componente.x)*20,h-float(componente.y)*20), str(componente.numero), fill = 'red', font=myFont, anchor='mm')
     
-    img.save("Vision Artificial/PCB/board-list.png")
+    img.save("VisionArtificial/PCB/board-list.png")
