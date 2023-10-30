@@ -59,7 +59,8 @@ class TUTORIAL(QWidget):
         
         # Widget para el navegador
         self.webview = QWebEngineView()
-        self.webview.setUrl(QUrl("https://www.recursospython.com/"))
+        self.webview.setUrl(QUrl("https://delta-assysbot.firebaseapp.com"))
+        # self.webview.setUrl(QUrl("https://www.recursospython.com/"))
         main_layout.addWidget(self.webview, alignment = Qt.AlignCenter)
         
         # Button 01: Inicio de programa

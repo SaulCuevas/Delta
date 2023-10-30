@@ -44,6 +44,7 @@ import matplotlib
 matplotlib.use('Qt5Agg')
 
 
+
 class COMENZAR(QWidget):
     # Constructor
     def __init__(self):
@@ -61,12 +62,52 @@ class COMENZAR(QWidget):
         lbl_comenzar.setFixedSize(w, h)
         main_layout.addWidget(lbl_comenzar, alignment = Qt.AlignCenter)
 
-        # Label 01: Imagen Bienvenida
-        im = QPixmap("imagenes/delta.jpg")
-        im = im.scaled(400, 400, Qt.KeepAspectRatio)
-        self.lbl = QLabel()
-        self.lbl.setPixmap(im)
-        main_layout.addWidget(self.lbl, alignment = Qt.AlignCenter)
+        # # Label 01: Imagen Bienvenida
+        # im = QPixmap("imagenes/delta.jpg")
+        # im = im.scaled(400, 400, Qt.KeepAspectRatio)
+        # self.lbl = QLabel()
+        # self.lbl.setPixmap(im)
+        # main_layout.addWidget(self.lbl, alignment = Qt.AlignCenter)
+        
+        # BUTTON 1: NUEVO USUARIO
+        self.btn_new = QPushButton("Nuevo Usuario")
+        style = "QPushButton { "
+        style += "background-color: rgb(41, 128, 185); "
+        style += "border-style: outset; "
+        style += "border-width: 5px; "
+        style += "border-radius: 20px; "
+        style += "border-color: rgb(26, 82, 118); "
+        style += "font-weight: bold; "
+        style += "font-family: Georgia; "
+        style += "font-size: 25pt; "
+        # style += "margin: 10px; "
+        style += "padding: 10px }"
+        
+        style += "QPushButton:hover { "
+        style += "background-color: rgb(155, 89, 182); "
+        style += "border-color: rgb(187, 143, 206); "
+        style += "border-style: groove } "
+        
+        style += "QPushButton:pressed { "
+        style += "background-color: rgb(192, 57, 43); "
+        style += "border-color: rgb(231, 76, 60); "
+        style += "border-style: inset } "
+        
+        self.btn_new.setStyleSheet(style)
+        w = self.btn_new.sizeHint().width()
+        h = self.btn_new.sizeHint().height()
+        self.btn_new.setFixedSize(w + 10, h + 10)
+        main_layout.addWidget(self.btn_new, alignment = Qt.AlignCenter)
+        
+        # BUTTON 1: USUARIO EXISTENTE
+        self.btn_old = QPushButton("Usuario Existente")     
+        self.btn_old.setStyleSheet(style)
+        w = self.btn_old.sizeHint().width()
+        h = self.btn_old.sizeHint().height()
+        self.btn_old.setFixedSize(w + 10, h + 10)
+        main_layout.addWidget(self.btn_old, alignment = Qt.AlignCenter)
+        
+        
         
         
         # Button 01: Inicio de programa
@@ -98,4 +139,12 @@ class COMENZAR(QWidget):
         
         
         self.setLayout(main_layout)
+        
+        
+# -----------------------------------------------------------------------------
+
+
+        
+# -----------------------------------------------------------------------------
+        
         

@@ -37,6 +37,9 @@ from PyQt5.QtWidgets import (
     QMessageBox,
     QFileDialog,
     QTabWidget,
+    QTableWidget,
+    QTableWidgetItem,
+    QDesktopWidget,
     QLineEdit,
     QCheckBox,
     QDoubleSpinBox)
@@ -49,6 +52,9 @@ class SMD(QWidget):
         # Configuración pantalla GUI
         super().__init__()
         
+        self.w = QDesktopWidget().screenGeometry().width()
+        self.h = QDesktopWidget().screenGeometry().height()
+        
         main_layout = QVBoxLayout()
 
         # Label 01: Etiqueta para Selección de Puerto COM
@@ -60,13 +66,84 @@ class SMD(QWidget):
         lbl_smd.setFixedSize(w, h)
         main_layout.addWidget(lbl_smd, alignment = Qt.AlignCenter)
 
-        # Label 01: Imagen Bienvenida
-        im = QPixmap("imagenes/delta.jpg")
-        im = im.scaled(400, 400, Qt.KeepAspectRatio)
-        self.lbl = QLabel()
-        self.lbl.setPixmap(im)
-        main_layout.addWidget(self.lbl, alignment = Qt.AlignCenter)
-                
+        # Tab Widget
+        tab_widget = QTabWidget()
+        
+        table1= [
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+            {'Empaquetado': '01005', 'Componente': 'Resistencias, Capacitores', 'mm': '0.4 x 0.2', 'in': '0.01 x 0.005', 'Peso aprox': '0.04', 'Imagen': '-'},
+        ]
+        
+        smd1 = QTableWidget(self)
+
+        smd1.setColumnCount(6)
+        
+        smd1.setHorizontalHeaderLabels(table1[0].keys())
+        smd1.setRowCount(len(table1))
+
+        row = 0
+        for e in table1:
+            smd1.setItem(row, 0, QTableWidgetItem(e['Empaquetado']))
+            smd1.setItem(row, 1, QTableWidgetItem(e['Componente']))
+            smd1.setItem(row, 2, QTableWidgetItem(e['mm']))
+            smd1.setItem(row, 3, QTableWidgetItem(e['in']))
+            smd1.setItem(row, 4, QTableWidgetItem(e['Peso aprox']))
+            smd1.setItem(row, 5, QTableWidgetItem(e['Imagen']))
+            row += 1
+            
+        smd2 = QTableWidget(self)
+        smd3 = QTableWidget(self)
+        smd4 = QTableWidget(self)
+        smd5 = QTableWidget(self)
+        smd6 = QTableWidget(self)
+        
+        tab_widget.addTab(smd1, "General")
+        tab_widget.addTab(smd2, "Resistores")
+        tab_widget.addTab(smd3, "Capacitores")
+        tab_widget.addTab(smd4, "LED")
+        tab_widget.addTab(smd5, "Transistores")
+        tab_widget.addTab(smd6, "Circuito Integrado")
+        
+        w = self.w - 200
+        h = self.h -200
+        
+        smd1.setColumnWidth(0, w * 0.1)
+        smd1.setColumnWidth(1, w * 0.3)
+        smd1.setColumnWidth(2, w * 0.15)
+        smd1.setColumnWidth(3, w * 0.15)
+        smd1.setColumnWidth(4, w * 0.1)
+        smd1.setColumnWidth(5, w * 0.2)
+        
+        
+        tab_widget.setFixedSize(w, h)
+        
+        main_layout.addWidget(tab_widget, alignment = Qt.AlignCenter)
         
         # Button 01: Inicio de programa
         self.btn_start = QPushButton("Volver")

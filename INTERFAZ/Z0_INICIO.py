@@ -20,6 +20,7 @@ Descripción:
 @author: Spect
 """
 
+# Líbrerías
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QFont
 from PyQt5.QtWidgets import (
@@ -27,25 +28,29 @@ from PyQt5.QtWidgets import (
     QLabel,
     QWidget,
     QPushButton)
-import matplotlib
-matplotlib.use('Qt5Agg')
+import os
 
+# Dirección de imagen
+img_delta = os.path.join(os.path.dirname(os.path.abspath(__file__)), "imagenes/delta.jpg")
 
+# CLASE INICIO - WIDGET
 class INICIO(QWidget):
     # Constructor
     def __init__(self):
         # Configuración pantalla GUI
         super().__init__()
-        
-        main_layout = QVBoxLayout()
+        # Generación layouts generales
+        inicio_layout = QVBoxLayout()
+
+    # ----- INICIO WIDGET -----------------------------------------------------
 
         # Label 01: Imagen Bienvenida
-        im = QPixmap("imagenes/delta.jpg")
+        im = QPixmap(img_delta)
         im = im.scaled(400, 400, Qt.KeepAspectRatio)
         self.lbl = QLabel()
         self.lbl.setPixmap(im)
         self.lbl.adjustSize()
-        main_layout.addWidget(self.lbl, alignment = Qt.AlignCenter)
+        inicio_layout.addWidget(self.lbl, alignment = Qt.AlignCenter)
         
         
         # Button 01: Inicio de programa
@@ -72,8 +77,8 @@ class INICIO(QWidget):
         w = self.btn_start.sizeHint().width() + 100
         h = self.btn_start.sizeHint().height() + 5
         self.btn_start.setFixedSize(w, h)
-        main_layout.addWidget(self.btn_start, alignment = Qt.AlignCenter)
-        
+        inicio_layout.addWidget(self.btn_start, alignment = Qt.AlignCenter)
+    
         # self.setStyleSheet("border: 1px solid black; background-color: lightgreen")
-        self.setLayout(main_layout)
+        self.setLayout(inicio_layout)
         

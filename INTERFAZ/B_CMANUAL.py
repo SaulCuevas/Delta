@@ -30,6 +30,7 @@ from PyQt5.QtWidgets import (
     QDesktopWidget,
     QHBoxLayout,
     QVBoxLayout,
+    QStackedLayout,
     QLabel,
     QWidget,
     QSpinBox,
@@ -70,7 +71,7 @@ class CMANUAL(QWidget):
         v4_layout = QVBoxLayout()
         
         # Layouts para Horizontal 2
-        v5_layout = QVBoxLayout()
+        self.v5_layout = QVBoxLayout()
         v6_layout = QVBoxLayout()
     
 # ------- TITLE -----------------------------------------------------------
@@ -442,23 +443,112 @@ class CMANUAL(QWidget):
     
     # ----- LAYOUT VERTICAL 5 ---------------------------------------------
     
-        x_btn_layout = QHBoxLayout()
-        y_btn_layout = QHBoxLayout()
-        z_btn_layout = QHBoxLayout()
+        self.x_btn_layout = QHBoxLayout()
+        self.y_btn_layout = QHBoxLayout()
+        self.z_btn_layout = QHBoxLayout()
+        self.m1_btn_layout = QHBoxLayout()
+        self.m2_btn_layout = QHBoxLayout()
+        self.m3_btn_layout = QHBoxLayout()
         sw_coord_layout = QHBoxLayout()
 
-        x_btn_widget = QWidget()
-        y_btn_widget = QWidget()
-        z_btn_widget = QWidget()
+        self.x_btn_widget = QWidget()
+        self.y_btn_widget = QWidget()
+        self.z_btn_widget = QWidget()
+        self.m1_btn_widget = QWidget()
+        self.m2_btn_widget = QWidget()
+        self.m3_btn_widget = QWidget()
         sw_coord_widget = QWidget()
 
-        x_btn_widget.setLayout(x_btn_layout)      
-        y_btn_widget.setLayout(y_btn_layout)      
-        z_btn_widget.setLayout(z_btn_layout)      
+        self.x_btn_widget.setLayout(self.x_btn_layout)      
+        self.y_btn_widget.setLayout(self.y_btn_layout)      
+        self.z_btn_widget.setLayout(self.z_btn_layout)   
+        self.m1_btn_widget.setLayout(self.m1_btn_layout)      
+        self.m2_btn_widget.setLayout(self.m2_btn_layout)      
+        self.m3_btn_widget.setLayout(self.m3_btn_layout)   
         sw_coord_widget.setLayout(sw_coord_layout)
         
-        # BUTTON X+ : Desplazamiento en X positivo coordenadas rectangulares
-        self.btn_xp = QPushButton("X+")
+        self.xm_layout = QStackedLayout()
+        self.ym_layout = QStackedLayout()
+        self.zm_layout = QStackedLayout()
+        
+        self.xm_layout.addWidget(self.x_btn_widget)
+        self.xm_layout.addWidget(self.m1_btn_widget)
+        self.ym_layout.addWidget(self.y_btn_widget)
+        self.ym_layout.addWidget(self.m2_btn_widget)
+        self.zm_layout.addWidget(self.z_btn_widget)
+        self.zm_layout.addWidget(self.m3_btn_widget)
+        
+        self.xm_widget = QWidget()
+        self.ym_widget = QWidget()
+        self.zm_widget = QWidget()
+        self.xm_widget.setLayout(self.xm_layout)
+        self.ym_widget.setLayout(self.ym_layout)
+        self.zm_widget.setLayout(self.zm_layout)
+        
+        # BUTTON M1- : Desplazamiento negativo en Motor 1
+        self.btn_m1n = QPushButton("M1-")
+        
+        style = "QPushButton { "
+        style += "background-color: rgb(41, 128, 185); "
+        style += "border-style: outset; "
+        style += "border-width: 5px; "
+        style += "border-radius: 20px; "
+        style += "border-color: rgb(26, 82, 118); "
+        style += "font-weight: bold; "
+        style += "font-family: Georgia; "
+        style += "font-size: 20pt; "
+        # style += "margin: 10px; "
+        style += "padding: 10px }"
+        
+        style += "QPushButton:hover { "
+        style += "background-color: rgb(155, 89, 182); "
+        style += "border-color: rgb(187, 143, 206); "
+        style += "border-style: groove } "
+        
+        style += "QPushButton:pressed { "
+        style += "background-color: rgb(192, 57, 43); "
+        style += "border-color: rgb(231, 76, 60); "
+        style += "border-style: inset } "
+        
+        self.btn_m1n.setStyleSheet(style)
+        w = self.btn_m1n.sizeHint().width()
+        self.btn_m1n.setFixedSize(w + 10, w)
+        self.m1_btn_layout.addWidget(self.btn_m1n, alignment = Qt.AlignCenter)
+        
+        # BUTTON M1+ : Desplazamiento positivo en Motor 1
+        self.btn_m1p = QPushButton("M1+")
+        self.btn_m1p.setStyleSheet(style)
+        self.btn_m1p.setFixedSize(w + 10, w)
+        self.m1_btn_layout.addWidget(self.btn_m1p, alignment = Qt.AlignCenter)
+        
+        # BUTTON M2- : Desplazamiento negativo en Motor 2
+        self.btn_m2n = QPushButton("M2-")
+        self.btn_m2n.setStyleSheet(style)
+        self.btn_m2n.setFixedSize(w + 10, w)
+        self.m2_btn_layout.addWidget(self.btn_m2n, alignment = Qt.AlignCenter)
+        
+        # BUTTON M2+ : Desplazamiento positivo en Motor 2
+        self.btn_m2p = QPushButton("M2+")
+        self.btn_m2p.setStyleSheet(style)
+        self.btn_m2p.setFixedSize(w + 10, w)
+        self.m2_btn_layout.addWidget(self.btn_m2p, alignment = Qt.AlignCenter)
+        
+        # BUTTON M3- : Desplazamiento negativo en Motor 3
+        self.btn_m3n = QPushButton("M3-")
+        self.btn_m3n.setStyleSheet(style)
+        self.btn_m3n.setFixedSize(w + 10, w)
+        self.m3_btn_layout.addWidget(self.btn_m3n, alignment = Qt.AlignCenter)
+        
+        # BUTTON M3+ : Desplazamiento positivo en Motor 3
+        self.btn_m3p = QPushButton("M3+")
+        self.btn_m3p.setStyleSheet(style)
+        self.btn_m3p.setFixedSize(w + 10, w)
+        self.m3_btn_layout.addWidget(self.btn_m3p, alignment = Qt.AlignCenter)
+        
+        
+        # BUTTON X- : Desplazamiento en X negativo coordenadas rectangulares
+        self.btn_xn = QPushButton("X-")     
+        
         style = "QPushButton { "
         style += "background-color: rgb(41, 128, 185); "
         style += "border-style: outset; "
@@ -481,40 +571,40 @@ class CMANUAL(QWidget):
         style += "border-color: rgb(231, 76, 60); "
         style += "border-style: inset } "
         
-        self.btn_xp.setStyleSheet(style)
-        w = self.btn_xp.sizeHint().width()
-        self.btn_xp.setFixedSize(w + 10, w)
-        x_btn_layout.addWidget(self.btn_xp, alignment = Qt.AlignCenter)
-        
-        # BUTTON X- : Desplazamiento en X negativo coordenadas rectangulares
-        self.btn_xn = QPushButton("X-")
         self.btn_xn.setStyleSheet(style)
         self.btn_xn.setFixedSize(w + 10, w)
-        x_btn_layout.addWidget(self.btn_xn, alignment = Qt.AlignCenter)
+        self.x_btn_layout.addWidget(self.btn_xn, alignment = Qt.AlignCenter)
         
-        # BUTTON Y+ : Desplazamiento en Y positivo coordenadas rectangulares
-        self.btn_yp = QPushButton("Y+")
-        self.btn_yp.setStyleSheet(style)
-        self.btn_yp.setFixedSize(w + 10, w)
-        y_btn_layout.addWidget(self.btn_yp, alignment = Qt.AlignCenter)
+        # BUTTON X+ : Desplazamiento en X positivo coordenadas rectangulares
+        self.btn_xp = QPushButton("X+")
+        self.btn_xp.setStyleSheet(style)
+        self.btn_xp.setFixedSize(w + 10, w)
+        self.x_btn_layout.addWidget(self.btn_xp, alignment = Qt.AlignCenter)
         
         # BUTTON Y- : Desplazamiento en Y negativo coordenadas rectangulares
         self.btn_yn = QPushButton("Y-")
         self.btn_yn.setStyleSheet(style)
         self.btn_yn.setFixedSize(w + 10, w)
-        y_btn_layout.addWidget(self.btn_yn, alignment = Qt.AlignCenter)
+        self.y_btn_layout.addWidget(self.btn_yn, alignment = Qt.AlignCenter)
         
-        # BUTTON Z+ : Desplazamiento en Z positivo coordenadas rectangulares
-        self.btn_zp = QPushButton("Z+")
-        self.btn_zp.setStyleSheet(style)
-        self.btn_zp.setFixedSize(w + 10, w)
-        z_btn_layout.addWidget(self.btn_zp, alignment = Qt.AlignCenter)
+        # BUTTON Y+ : Desplazamiento en Y positivo coordenadas rectangulares
+        self.btn_yp = QPushButton("Y+")
+        self.btn_yp.setStyleSheet(style)
+        self.btn_yp.setFixedSize(w + 10, w)
+        self.y_btn_layout.addWidget(self.btn_yp, alignment = Qt.AlignCenter)
         
         # BUTTON Z- : Desplazamiento en Z negativo coordenadas rectangulares
         self.btn_zn = QPushButton("Z-")
         self.btn_zn.setStyleSheet(style)
         self.btn_zn.setFixedSize(w + 10, w)
-        z_btn_layout.addWidget(self.btn_zn, alignment = Qt.AlignCenter)
+        self.z_btn_layout.addWidget(self.btn_zn, alignment = Qt.AlignCenter)
+        
+        # BUTTON Z+ : Desplazamiento en Z positivo coordenadas rectangulares
+        self.btn_zp = QPushButton("Z+")
+        self.btn_zp.setStyleSheet(style)
+        self.btn_zp.setFixedSize(w + 10, w)
+        self.z_btn_layout.addWidget(self.btn_zp, alignment = Qt.AlignCenter)
+        
         
         # SWITCH: TOOGLE BUTTON CAMBIO DE COORDENADAS
         self.sw_coord = ToggleButton()
@@ -533,23 +623,26 @@ class CMANUAL(QWidget):
         self.lbl_typecrd.setFixedSize(w, h)
         sw_coord_layout.addWidget(self.lbl_typecrd, alignment = Qt.AlignCenter)
         
-        v5_layout.addWidget(x_btn_widget, alignment = Qt.AlignCenter)
-        v5_layout.addWidget(y_btn_widget, alignment = Qt.AlignCenter)
-        v5_layout.addWidget(z_btn_widget, alignment = Qt.AlignCenter)
-        v5_layout.addWidget(sw_coord_widget, alignment = Qt.AlignCenter)   
-        v5_layout.setSpacing(0)
-        v5_layout.setContentsMargins(0, 0, 0, 0)
+        self.v5_layout.addWidget(self.xm_widget, alignment = Qt.AlignCenter)
+        self.v5_layout.addWidget(self.ym_widget, alignment = Qt.AlignCenter)
+        self.v5_layout.addWidget(self.zm_widget, alignment = Qt.AlignCenter)
+        self.v5_layout.addWidget(sw_coord_widget, alignment = Qt.AlignCenter)
+        self.v5_layout.setSpacing(15)
+        self.v5_layout.setContentsMargins(0, 0, 0, 0)
         
         w = sw_coord_widget.sizeHint().width()
         h = sw_coord_widget.sizeHint().height()
-        bh = x_btn_widget.sizeHint().height()
-        x_btn_widget.setFixedSize(w, bh)
-        y_btn_widget.setFixedSize(w, bh)
-        z_btn_widget.setFixedSize(w, bh)
+        bh = self.xm_widget.sizeHint().height()
+        self.xm_widget.setFixedSize(w, bh)
+        self.ym_widget.setFixedSize(w, bh)
+        self.zm_widget.setFixedSize(w, bh)
+        # self.m1_btn_widget.setFixedSize(w, bh)
+        # self.m2_btn_widget.setFixedSize(w, bh)
+        # self.m3_btn_widget.setFixedSize(w, bh)
         sw_coord_widget.setFixedSize(w, h)
     
         v5_widget = QWidget()
-        v5_widget.setLayout(v5_layout)
+        v5_widget.setLayout(self.v5_layout)
         
         w = v5_widget.sizeHint().width()
         h = v5_widget.sizeHint().height()
@@ -625,6 +718,9 @@ class CMANUAL(QWidget):
         
         main_layout.setSpacing(0)
         main_layout.setContentsMargins(0, 0, 0, 0)
+        self.m1_btn_widget.hide()
+        self.m2_btn_widget.hide()
+        self.m3_btn_widget.hide()
         self.setLayout(main_layout)
     
     
@@ -633,12 +729,18 @@ class CMANUAL(QWidget):
     # FUNCIÓN PARA CAMBIO DE COORDENADAS
     def change_coord(self, on_off):
         if on_off == False:
+            self.xm_layout.setCurrentIndex(0)
+            self.ym_layout.setCurrentIndex(0)
+            self.zm_layout.setCurrentIndex(0)
             self.top_typecrd.setText('R')
             self.lbl_x.setText("X:")
             self.lbl_y.setText("Y:")
             self.lbl_z.setText("Z:")
             self.lbl_typecrd.setText('RECTANGULARES')
         else:
+            self.xm_layout.setCurrentIndex(1)
+            self.ym_layout.setCurrentIndex(1)
+            self.zm_layout.setCurrentIndex(1)
             self.top_typecrd.setText('M')
             self.lbl_x.setText("M1:")
             self.lbl_y.setText("M2:")

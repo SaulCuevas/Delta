@@ -36,6 +36,9 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QMessageBox,
     QFileDialog,
+    QTableWidget,
+    QTableWidgetItem,
+    QDesktopWidget,
     QTabWidget,
     QLineEdit,
     QCheckBox,
@@ -50,6 +53,9 @@ class ESTADISTICAS(QWidget):
         # Configuración pantalla GUI
         super().__init__()
         
+        self.w = QDesktopWidget().screenGeometry().width()
+        self.h = QDesktopWidget().screenGeometry().height()
+        
         main_layout = QVBoxLayout()
 
         # Label 01: Etiqueta para Selección de Puerto COM
@@ -60,13 +66,24 @@ class ESTADISTICAS(QWidget):
         h = lbl_estadisticas.sizeHint().height()
         lbl_estadisticas.setFixedSize(w, h)
         main_layout.addWidget(lbl_estadisticas, alignment = Qt.AlignCenter)
-
-        # Label 01: Imagen Bienvenida
-        im = QPixmap("imagenes/delta.jpg")
-        im = im.scaled(400, 400, Qt.KeepAspectRatio)
-        self.lbl = QLabel()
-        self.lbl.setPixmap(im)
-        main_layout.addWidget(self.lbl, alignment = Qt.AlignCenter)
+        
+        
+        # Table Widget
+        stats_table = QTableWidget()
+        
+        labels = ['Hora', 'Usuarios', 'Total']
+        
+        stats_table.setColumnCount(1)
+        stats_table.setRowCount(len(labels))
+        stats_table.setVerticalHeaderLabels(labels)
+        stats_table.verticalHeader().setVisible(True)
+        stats_table.horizontalHeader().setVisible(False)
+        
+        w = self.w - 200
+        h = self.h -200
+        stats_table.setFixedSize(w, h)
+        
+        main_layout.addWidget(stats_table, alignment = Qt.AlignCenter)
         
         
         # Button 01: Inicio de programa

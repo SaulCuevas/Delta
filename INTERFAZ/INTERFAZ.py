@@ -30,6 +30,8 @@ import C_SMD as smd
 import D_ESTADISTICAS as statistics
 import E_COMENZAR as comenzar
 
+import E1_COMENZAR as archivos
+
 import PyQt5.QtGui as pyGui
 
 from PyQt5.QtCore import Qt
@@ -38,14 +40,22 @@ from PyQt5.QtWidgets import (
     QDesktopWidget,
     QMainWindow)
 
+import ctypes
+
 
 class MainWindow(QMainWindow):
     # Constructor
     def __init__(self):
         # Configuración pantalla GUI
         super().__init__()
+        # self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setWindowTitle("DELTA-ASSYSBOT")
-        self.setWindowIcon(pyGui.QIcon('delta.jpg'))
+        self.setWindowIcon(pyGui.QIcon(inicio.img_delta))
+        
+        myappid = 'mycompany.myproduct.subproduct.version' # arbitrary string
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+        
         # self.setFixedSize(1024, 600)
         self.setWindowFlag(Qt.FramelessWindowHint)
         # self.widget = QWidget()
@@ -66,16 +76,19 @@ class MainWindow(QMainWindow):
         # print(h1)
         
         # self.startTUTORIAL()
+        
+        
+        
         self.startINICIO()
         
 # -----------------------------------------------------------------------------
 
     def startINICIO(self):
         self.INICIO = inicio.INICIO()
-        # self.main_layout.addWidget(self.INICIO)
         self.setCentralWidget(self.INICIO)
         self.INICIO.btn_start.clicked.connect(self.startMENU)
-        self.show()
+        self.showMaximized()
+        
         
 # -----------------------------------------------------------------------------
         
@@ -88,7 +101,7 @@ class MainWindow(QMainWindow):
         self.MENU.btn_4.clicked.connect(self.startESTADISTICAS)
         self.MENU.btn_5.clicked.connect(self.startCOMENZAR)
         self.MENU.btn_inicio.clicked.connect(self.startINICIO)
-        self.show()
+        self.showMaximized()
 
 # -----------------------------------------------------------------------------
 
@@ -96,7 +109,7 @@ class MainWindow(QMainWindow):
         self.TUTORIAL = tutorial.TUTORIAL()
         self.setCentralWidget(self.TUTORIAL)
         self.TUTORIAL.btn_start.clicked.connect(self.startMENU)
-        self.show()
+        self.showMaximized()
 
 # -----------------------------------------------------------------------------
 
@@ -104,7 +117,7 @@ class MainWindow(QMainWindow):
         self.CMANUAL = cmanual.CMANUAL()
         self.setCentralWidget(self.CMANUAL)
         self.CMANUAL.btn_start.clicked.connect(self.startMENU)
-        self.show()
+        self.showMaximized()
 
 # -----------------------------------------------------------------------------
 
@@ -112,7 +125,7 @@ class MainWindow(QMainWindow):
         self.SMD = smd.SMD()
         self.setCentralWidget(self.SMD)
         self.SMD.btn_start.clicked.connect(self.startMENU)
-        self.show()
+        self.showMaximized()
 
 # -----------------------------------------------------------------------------
 
@@ -120,7 +133,7 @@ class MainWindow(QMainWindow):
         self.ESTADISTICAS = statistics.ESTADISTICAS()
         self.setCentralWidget(self.ESTADISTICAS)
         self.ESTADISTICAS.btn_start.clicked.connect(self.startMENU)
-        self.show()
+        self.showMaximized()
 
 # -----------------------------------------------------------------------------
 
@@ -128,7 +141,14 @@ class MainWindow(QMainWindow):
         self.COMENZAR = comenzar.COMENZAR()
         self.setCentralWidget(self.COMENZAR)
         self.COMENZAR.btn_start.clicked.connect(self.startMENU)
-        self.show()
+        self.COMENZAR.btn_old.clicked.connect(self.user)
+        self.showMaximized()
+        
+    def user(self):
+        self.archivos = archivos.ARCHIVOS()
+        self.setCentralWidget(self.archivos)
+        self.archivos.btn_start.clicked.connect(self.startMENU)
+        self.showMaximized()
         
 # -----------------------------------------------------------------------------
 
