@@ -38,7 +38,7 @@ unsigned long sampleTime = 5; // Tiempo de muestreo en milisegundos
 String str = "";        // String recibida por el microcontrolador
 bool strComplete = false;  // bandera de identificacion de String
 const char separator = ' ';
-const int dataLength = 3;
+const int dataLength = 9; // Ex: M123 1.2345 2.3456 3.4567 1.2345 2.3456 3.4567 1.2345 2.3456 3.4567
 
 // Pines ESP32
 const int pinIN1[7] = {32, 25, 27, 15,  4, 17, 18} ;
@@ -66,12 +66,22 @@ const int PWMResolution = 16;
 const int MAX_DUTY_CYCLE = (int)(pow(2, PWMResolution)-1);
 
 // Parametros del motor
-const float ZONA_MUERTA = 20.0; // Porcentaje PWM en donde se vence la zona muerta
+const float ZONA_MUERTA = 8.0; // Porcentaje PWM en donde se vence la zona muerta
+const float MAX_POS = 2*PI;
+float B = 5; // Constante de amortiguamiento
+float J = 5; // Constante de inercia
+float qd = 0.0;
+float dqd = 0.0;
+float d2qd = 0.0;
 
 // Variables globales
 float args[dataLength];
 float SetPoints[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 float angulo[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float angulo_1[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float angulo_real[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float angulo_real_1[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+int offset[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 float PWMvalue[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 bool flag_mostrar_valores_PID = false;
 bool flag_control_M1 = false;
@@ -80,19 +90,46 @@ bool flag_control_M3 = false;
 bool flag_control_M4 = false;
 bool flag_control_M5 = false;
 bool flag_control_M6 = false;
+bool flag_control_M7 = false;
 bool busy = false;
+bool lastbusy = false;
 
 // Parametros del PID
-const float Kp = 4.249;
-const float Ki = 0.14678;
-const float Kd = 2.4281e-06;
-const float error_min = 0.5;
+/*
+const float Kp = 19.071;
+const float Ki = 49.5756;
+const float Kd = 0.50026;
+*/
+
+const float T = 5.0/1000.0;
+// const float Kp = 1412.13; // 28GP-385 25RPM
+// const float Ki = 0.0; // 28GP-385 25RPM
+// const float Kd = 68.2507; // 28GP-385 25RPM
+const float Kp = 865.5567; // JGY
+const float Ki = 0.0; // JGY
+const float Kd = 57.3356; // JGY
+const float K1 = Kp + Ki*T/2 + Kd/T;
+const float K2 = -Kp + Ki*T/2 - 2*Kd/T;
+const float K3 = Kd/T;
+
+/*
+const float Kp = 1.5308;
+const float Ki = 74.8949;
+const float Kd = 0.0;
+*/
+const float error_min = 0.01;
 
 // Variables del PID
-float error[6];
-float error_1[6];
-float errorI[6];
-float errorD[6];
+float error[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float error_1[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float errorI[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float errorD[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+float z_2[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float z_1[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float z[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float u_1[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+float u[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 void setup() {
   // Se configuran los pines de salida
@@ -153,13 +190,14 @@ void setup() {
 
 void loop() {
   if(millis() - lastTime >= sampleTime){
+    sinewave(2, 0.5);
     // Si una o mas banderas de control estan activadas, el robot
     // esta ocupado y no puede recibir una nueva instruccion
-    lastbusy = busy;
+    /*lastbusy = busy;
     busy = flag_control_M1 | flag_control_M2 | flag_control_M3 | flag_control_M4 | flag_control_M5 | flag_control_M6;
-    if ( (busy ~= lastbusy) & ~busy ){
+    if ( (busy ~= lastbusy) & (~busy) ){
       Serial.println("ready");
-    }
+    }*/
     if (strComplete) {
       descifrar_comando();
       str = "";
@@ -169,8 +207,17 @@ void loop() {
     // Motor Delta 1
     if(flag_control_M1){
       PCA9548A_cambio_direccion(0,1);
+      angulo_1[0]= angulo[0];
       angulo[0] = leerMT6701();
-      PWMvalue[0] = calcularPID(0, SetPoints[0], angulo[0]);
+      if( (angulo[0]>(MAX_POS*0.9)) && (angulo_1[0]<(MAX_POS*0.1)) ) offset[0]--;
+      if( (angulo[0]<(MAX_POS*0.1)) && (angulo_1[0]>(MAX_POS*0.9)) ) offset[0]++;
+
+      angulo_real_1[0] = angulo_real[0];
+      angulo_real[0] = angulo[0] + offset[0]*MAX_POS;
+      // PWMvalue[0] = calcularPID2(0, SetPoints[0], angulo_real[0]);
+      PWMvalue[0] = calcularPIDFF(0, qd, dqd, d2qd, angulo_real[0]);
+      setMotor(PWMvalue[0], PWMChannelIN1_0, PWMChannelIN2_0);
+      /*
       if(abs(error[0])<error_min){
         PWMvalue[0] = 0.0;
         setMotor(0.0, PWMChannelIN1_0, PWMChannelIN2_0);
@@ -178,6 +225,7 @@ void loop() {
         flag_control_M1 = false;
       }
       else setMotor(PWMvalue[0], PWMChannelIN1_0, PWMChannelIN2_0);
+      */
     }
     // Motor Delta 2
     if(flag_control_M2){
@@ -262,11 +310,12 @@ void loop() {
       else setMotor(PWMvalue[6], PWMChannelIN1_6, PWMChannelIN2_6);
     }
     // Muestra los valores para monitorear el comportamiento del PID
-    if(flag_mostrar_valores_PID){
-      Serial.print("PosRef:"); Serial.print(SetPoints[0]); Serial.print(",");
-      Serial.print("Pos:"); Serial.print(angulo[0]); Serial.print(",");
-      Serial.print("Error:"); Serial.print(error[0]); Serial.print(",");
-      Serial.print("PID:"); Serial.println(PWMvalue[0]);
+    if(flag_mostrar_valores_PID){      
+      // Serial.print("PosRef:"); Serial.print(SetPoints[0],5); Serial.print(",");
+      Serial.print("PosRef:"); Serial.print(qd,5); Serial.print(",");
+      Serial.print("Pos:"); Serial.print(angulo_real[0],5); Serial.print(",");
+      Serial.print("Error:"); Serial.print(error[0],5); Serial.print(",");
+      Serial.print("PID:"); Serial.println(PWMvalue[0],5);
     }
     lastTime = millis();
   }
@@ -303,6 +352,12 @@ void descifrar_comando(){
   Serial.print("Arg1: "), Serial.println(args[0]);
   Serial.print("Arg2: "), Serial.println(args[1]);
   Serial.print("Arg3: "), Serial.println(args[2]);
+  // Serial.print("Arg4: "), Serial.println(args[3]);
+  // Serial.print("Arg5: "), Serial.println(args[4]);
+  // Serial.print("Arg6: "), Serial.println(args[5]);
+  // Serial.print("Arg7: "), Serial.println(args[6]);
+  // Serial.print("Arg8: "), Serial.println(args[7]);
+  // Serial.print("Arg9: "), Serial.println(args[8]);
 
   switch(comm1) {
     // Mover un motor a la posicion deseada
@@ -397,6 +452,12 @@ void descifrar_comando(){
       flag_control_M5 = false;
       flag_control_M6 = false;
       break;
+    case 'B':
+      B = args[0];
+      break;
+    case 'J':
+      J = args[0];
+      break;
     default:
       Serial.println("No reconozco ese comando");
       break;
@@ -433,7 +494,7 @@ float leerMT6701() {
 
   uint16_t concat = ((slaveByte1 << 6) | (slaveByte2 >> 2));
 
-  return ((float)concat * 360.0) / 16384.0;
+  return ((float)concat * MAX_POS) / 16384.0;
 }
 
 // Calcular PID
@@ -445,6 +506,30 @@ float calcularPID(int motor, float setpoint, float input){
   error_1[motor] = error[motor]; // Error anterior
   
   return Kp*error[motor]+Ki*errorI[motor]+Kd*errorD[motor];
+}
+
+// Calcular PID
+float calcularPID2(int motor, float setpoint, float input){
+  z_2[motor] = z_1[motor];
+  z_1[motor] = z[motor];
+  z[motor] = setpoint - input;
+  error[motor] = z[motor];
+
+  u_1[motor] = u[motor];
+  u[motor] = K1*z[motor] + K2*z_1[motor] + K3*z_2[motor] + u_1[motor];
+  return u[motor];
+}
+
+// Calcular PID con prealimentacion (feed-forward)
+float calcularPIDFF(int motor, float qd, float dqd, float d2qd, float q){
+  // qd   : pos deseada (trayectoria)
+  // dqd  : vel deseada (trayectoria)
+  // d2qd : acel deseada (trayectoria)
+  // q    : pos real (medida)
+  error[motor] = q-qd; // Error actual
+  errorI[motor] += error[motor] * sampleTime * 0.001; // Error acumulado
+  error_1[motor] = error[motor]; // Error anterior
+  return J*d2qd + B*dqd - J*( Kp*error[motor] + Ki*errorI[motor] + Kd*(error[motor] - error_1[motor])/(sampleTime*0.001) );
 }
 
 // Configuracion del motor
@@ -461,4 +546,12 @@ void setMotor(float valPWM, int IN1, int IN2){
     if(dir) ledcWrite(IN1, dutyCycle), ledcWrite(IN2, 0);
     else ledcWrite(IN1, 0), ledcWrite(IN2, dutyCycle);
   }
+}
+
+// Funcion seno para prueba de trayectoria
+void sinewave(float A, float w){
+  float t = millis()/1000.0;
+  qd = A*sin(w*t);
+  dqd = w*A*sin(w*t+PI/2);
+  d2qd = -pow(w,2)*A*sin(w*t);
 }

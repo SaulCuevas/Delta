@@ -29,9 +29,13 @@ elif top_bottom == 'N' or top_bottom == 'n':
      _top_bottom = False
 else: print('...'); exit()
 
-soldadura_lista = interprete_gerber.obtener_soldadura(path, _top_bottom)
+soldadura_lista = interprete_gerber.obtener_pnp(path, _top_bottom)
 
-puntos = Trayectorias.soldaduraclass_to_puntos2(soldadura_lista, 500)
+# puntos = Trayectorias.componentesclass_to_puntos(soldadura_lista, 400, 500)
+
+# ts_, ts, qds_, dqds_, d2qds_, qds, dqds, d2qds, pds, dpds, d2pds, err = Trayectorias.calc_trayectorias_ps_no_t(func=Trayectorias.bezier_no_t, Ps=puntos[:,0:3], vel_deseada=puntos[:,3])
+
+puntos = Trayectorias.componentesclass_to_puntos2(soldadura_lista, 400, 420)
 
 ts_, ts, qds_, dqds_, d2qds_, qds, dqds, d2qds, pds, dpds, d2pds, err = Trayectorias.calc_trayectorias_ps_no_t2(func=Trayectorias.bezier_no_t, operaciones=puntos[:,0], Ps=puntos[:,1:4], vel_deseada=puntos[:,4])
 
