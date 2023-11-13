@@ -95,8 +95,8 @@ def bezier(t2 : float, q1 : float, q2 : float):
 def bezier_no_t(t2 : float, q1 : float, q2 : float):
     interps = 10
     t1 = 0.0
-    if t2 < step:
-        t2 = step
+    if t2 < step*interps:
+        t2 = step*interps
     gamma_1 = 126; gamma_2 = 420; gamma_3 = 540; gamma_4 = 315; gamma_5 = 70
     t = np.linspace(start=t1, stop=t2, num=interps)
     qd = np.zeros(t.size)
@@ -276,81 +276,7 @@ def calc_trayectorias_ps(func, Ps : np.single, vel_deseada):
     d2pds = np.resize(d2pds, ts.shape)
     return ts, qds, dqds, d2qds, pds, dpds, d2pds, err
 
-def calc_trayectorias_ps_no_t(func, Ps : np.single, vel_deseada : np.single):
-    tiempos = np.zeros(Ps.shape[0]-1)
-    for i in range(Ps.shape[0]-1):
-        tiempos[i] = math.sqrt( (Ps[i+1,0]-Ps[i,0])**2 + (Ps[i+1,1]-Ps[i,1])**2 + (Ps[i+1,2]-Ps[i,2])**2 )/(vel_deseada[i]/1.5)    
-    t0 = np.zeros(1)
-    t1 = np.zeros(1)
-    t2 = np.zeros(1)
-    pd0 = np.zeros(1)
-    pd1 = np.zeros(1)
-    pd2 = np.zeros(1)
-    dpd0 = np.zeros(1)
-    dpd1 = np.zeros(1)
-    dpd2 = np.zeros(1)
-    d2pd0 = np.zeros(1)
-    d2pd1 = np.zeros(1)
-    d2pd2 = np.zeros(1)
-
-    for y in range(Ps.shape[0]-1):
-        t, pd, dpd, d2pd = func(tiempos[y], Ps[y,0], Ps[y+1,0])
-        t0 = np.append(t0[:-1],np.add(t,t0[-1]))
-        pd0 = np.append(pd0[:-1],pd)
-        dpd0 = np.append(dpd0[:-1],dpd)
-        d2pd0 = np.append(d2pd0[:-1],d2pd)
-
-        t, pd, dpd, d2pd = func(tiempos[y], Ps[y,1], Ps[y+1,1])
-        t1 = np.append(t1[:-1],np.add(t,t1[-1]))
-        pd1 = np.append(pd1[:-1],pd)
-        dpd1 = np.append(dpd1[:-1],dpd)
-        d2pd1 = np.append(d2pd1[:-1],d2pd)
-
-        t, pd, dpd, d2pd = func(tiempos[y], Ps[y,2], Ps[y+1,2])
-        t2 = np.append(t2[:-1],np.add(t,t2[-1]))
-        pd2 = np.append(pd2[:-1],pd)
-        dpd2 = np.append(dpd2[:-1],dpd)
-        d2pd2 = np.append(d2pd2[:-1],d2pd)
-     
-    ts = np.array([t0, t1, t2])
-    pds = np.array([pd0, pd1, pd2])
-    dpds = np.array([dpd0, dpd1, dpd2])
-    d2pds = np.array([d2pd0, d2pd1, d2pd2])
-
-    qds = np.zeros(ts.shape)
-    dqds = np.zeros(ts.shape)
-    d2qds = np.zeros(ts.shape)
-
-    for x in range(pds.shape[1]):
-        q1, q2, q3, err = DeltaIK(px=pds[0,x], py=pds[1,x], pz=pds[2,x])
-        if(err != 0):
-            print("error")
-            return ts, qds, pds, err
-        qds[:,x] = [q1, q2, q3]
-
-    for x in range(ts.shape[0]):
-        dqds[x] = np.gradient(qds[x], ts[x])
-        d2qds[x] = np.gradient(dqds[x], ts[x])
-
-    ts_ = np.arange(start=0, stop=ts[0,-1], step=step/2)
-    qds_ = np.zeros((3,ts_.shape[0]))
-    dqds_ = np.zeros((3,ts_.shape[0]))
-    d2qds_ = np.zeros((3,ts_.shape[0]))
-    cont = 0
-    for x in range(ts_.shape[0]):
-        if ts_[x] <= ts[0,cont+1]:
-            qds_[:,x] = qds[:,cont]
-            dqds_[:,x] = dqds[:,cont]
-            d2qds_[:,x] = d2qds[:,cont]
-        else:
-            cont += 1
-            qds_[:,x] = qds[:,cont]
-            dqds_[:,x] = dqds[:,cont]
-            d2qds_[:,x] = d2qds[:,cont]
-    
-    return ts_, ts, qds_, dqds_, d2qds_, qds, dqds, d2qds, pds, dpds, d2pds, err
-
-def calc_trayectorias_ps_no_t2(func, operaciones : np.single, Ps : np.single, vel_deseada : np.single):
+def calc_trayectorias_ps_no_t(func, operaciones : np.single, Ps : np.single, vel_deseada : np.single):
     tiempos = np.zeros(Ps.shape[0]-1)
     for i in range(Ps.shape[0]-1):
         if (operaciones[i] == movimiento) & (operaciones[i+1] == movimiento):
@@ -415,17 +341,50 @@ def calc_trayectorias_ps_no_t2(func, operaciones : np.single, Ps : np.single, ve
             dpd2 = np.append(dpd2[:-1],dpd)
             d2pd2 = np.append(d2pd2[:-1],d2pd)
         if operaciones[y] == soldadura:
+            t0 = np.append(t0,Ps[y][0]*2+t0[-1]) # le agrego al vector de tiempo el doble de la cantidad de soldadura (tiempo de pulso)
+            t1 = np.append(t1,Ps[y][0]*2+t1[-1])
+            t2 = np.append(t2,Ps[y][0]*2+t2[-1])
+            pd0 = np.append(pd0,pd0[-1])    # manteniendo la misma posicion
+            dpd0 = np.append(dpd0,0.0)       # vel = 0.0
+            d2pd0 = np.append(d2pd0,0.0)      # acel = 0.0
+            pd1 = np.append(pd1,pd1[-1])    # manteniendo la misma posicion
+            dpd1 = np.append(dpd1,0.0)       # vel = 0.0
+            d2pd1 = np.append(d2pd1,0.0)      # acel = 0.0
+            pd2 = np.append(pd2,pd2[-1])    # manteniendo la misma posicion
+            dpd2 = np.append(dpd2,0.0)       # vel = 0.0
+            d2pd2 = np.append(d2pd2,0.0)      # acel = 0.0
             index_soldaduras = np.append(index_soldaduras, t0.shape[0] + cont_op)
-            cont_op += 1
-            # agregar tiempo de operacion a t0, t1, t2
+            cont_op += 1 # quitar esta linea, ya no se hace con contadores sino con tiempos
         if operaciones[y] == valvula_on:
+            t0 = np.append(t0,0.5+t0[-1]) # le agrego al vector de tiempo 500 ms 
+            t1 = np.append(t1,0.5+t1[-1])
+            t2 = np.append(t2,0.5+t2[-1])
+            pd0 = np.append(pd0,pd0[-1])    # manteniendo la misma posicion
+            dpd0 = np.append(dpd0,0.0)       # vel = 0.0
+            d2pd0 = np.append(d2pd0,0.0)      # acel = 0.0
+            pd1 = np.append(pd1,pd1[-1])    # manteniendo la misma posicion
+            dpd1 = np.append(dpd1,0.0)       # vel = 0.0
+            d2pd1 = np.append(d2pd1,0.0)      # acel = 0.0
+            pd2 = np.append(pd2,pd2[-1])    # manteniendo la misma posicion
+            dpd2 = np.append(dpd2,0.0)       # vel = 0.0
+            d2pd2 = np.append(d2pd2,0.0)      # acel = 0.0
             index_valvula_on = np.append(index_valvula_on, t0.shape[0] + cont_valv)
             cont_valv += 1
-            # agregar tiempo de operacion a t0, t1, t2
         if operaciones[y] == valvula_off:
+            t0 = np.append(t0,0.5+t0[-1]) # le agrego al vector de tiempo 500 ms 
+            t1 = np.append(t1,0.5+t1[-1])
+            t2 = np.append(t2,0.5+t2[-1])
+            pd0 = np.append(pd0,pd0[-1])    # manteniendo la misma posicion
+            dpd0 = np.append(dpd0,0.0)       # vel = 0.0
+            d2pd0 = np.append(d2pd0,0.0)      # acel = 0.0
+            pd1 = np.append(pd1,pd1[-1])    # manteniendo la misma posicion
+            dpd1 = np.append(dpd1,0.0)       # vel = 0.0
+            d2pd1 = np.append(d2pd1,0.0)      # acel = 0.0
+            pd2 = np.append(pd2,pd2[-1])    # manteniendo la misma posicion
+            dpd2 = np.append(dpd2,0.0)       # vel = 0.0
+            d2pd2 = np.append(d2pd2,0.0)      # acel = 0.0
             index_valvula_off = np.append(index_valvula_off, t0.shape[0] + cont_valv)
             cont_valv += 1
-            # agregar tiempo de operacion a t0, t1, t2
 
     index_soldaduras = index_soldaduras[1:]
     index_valvula_on = index_valvula_on[1:]
@@ -450,7 +409,7 @@ def calc_trayectorias_ps_no_t2(func, operaciones : np.single, Ps : np.single, ve
         dqds[x] = np.gradient(qds[x], ts[x])
         d2qds[x] = np.gradient(dqds[x], ts[x])
 
-    ts_ = np.arange(start=0, stop=ts[0,-1], step=step/2)
+    ts_ = np.arange(start=0, stop=ts[0,-1], step=step)
     qds_ = np.zeros((3,ts_.shape[0]))
     dqds_ = np.zeros((3,ts_.shape[0]))
     d2qds_ = np.zeros((3,ts_.shape[0]))
@@ -465,6 +424,233 @@ def calc_trayectorias_ps_no_t2(func, operaciones : np.single, Ps : np.single, ve
             qds_[:,x] = qds[:,cont]
             dqds_[:,x] = dqds[:,cont]
             d2qds_[:,x] = d2qds[:,cont]
+    
+    return ts_, ts, qds_, dqds_, d2qds_, qds, dqds, d2qds, pds, dpds, d2pds, err
+
+def calc_trayectorias_ps_no_t2(func, operaciones : np.single, Ps : np.single, vel_deseada : np.single):
+    with open('test_trayectorias.txt', 'w') as f: 
+        tiempos = np.zeros(Ps.shape[0]-1)
+        for i in range(Ps.shape[0]-1):
+            if (operaciones[i] == movimiento) & (operaciones[i+1] == movimiento):
+                tiempos[i] = math.sqrt( (Ps[i+1,0]-Ps[i,0])**2 + (Ps[i+1,1]-Ps[i,1])**2 + (Ps[i+1,2]-Ps[i,2])**2 )/(vel_deseada[i]/1.5)
+            elif (operaciones[i] != movimiento) & (operaciones[i+1] == movimiento) & (i>0):
+                tiempos[i-1] = math.sqrt( (Ps[i+1,0]-Ps[i-1,0])**2 + (Ps[i+1,1]-Ps[i-1,1])**2 + (Ps[i+1,2]-Ps[i-1,2])**2 )/(vel_deseada[i-1]/1.5) 
+            elif operaciones[i] != movimiento:
+                tiempos[i] = Ps[i,0]  
+        t0 = np.zeros(1)
+        t1 = np.zeros(1)
+        t2 = np.zeros(1)
+        pd0 = np.array([home_pos[0]])
+        pd1 = np.array([home_pos[1]])
+        pd2 = np.array([home_pos[2]])
+        dpd0 = np.zeros(1)
+        dpd1 = np.zeros(1)
+        dpd2 = np.zeros(1)
+        d2pd0 = np.zeros(1)
+        d2pd1 = np.zeros(1)
+        d2pd2 = np.zeros(1)
+        index_soldaduras = np.zeros(1)
+        pulsos_soldaduras = np.zeros(1)
+        index_valvula_on = np.zeros(1)
+        index_valvula_off = np.zeros(1)
+        index_herramienta = np.zeros(1)
+        herramientas = np.zeros(1)
+        cont_sold = 0
+        cont_valv_on = 0
+        cont_valv_off = 0
+        cont_herr = 0
+        ############################################################################
+        for y in range(Ps.shape[0]-1):
+            if operaciones[y] == soldadura:
+                index_soldaduras = np.append(index_soldaduras, t0.shape[0])
+                pulsos_soldaduras = np.append(pulsos_soldaduras, Ps[y][0])
+                t0 = np.append(t0,Ps[y][0]*2+0.1+t0[-1]) # le agrego al vector de tiempo el doble de la cantidad de soldadura (tiempo de pulso) y 0.1 (tiempo de asentamiento arbitrario)
+                t1 = np.append(t1,Ps[y][0]*2+0.1+t1[-1])
+                t2 = np.append(t2,Ps[y][0]*2+0.1+t2[-1])
+                pd0 = np.append(pd0,pd0[-1])    # manteniendo la misma posicion
+                dpd0 = np.append(dpd0,0.0)       # vel = 0.0
+                d2pd0 = np.append(d2pd0,0.0)      # acel = 0.0
+                pd1 = np.append(pd1,pd1[-1])    # manteniendo la misma posicion
+                dpd1 = np.append(dpd1,0.0)       # vel = 0.0
+                d2pd1 = np.append(d2pd1,0.0)      # acel = 0.0
+                pd2 = np.append(pd2,pd2[-1])    # manteniendo la misma posicion
+                dpd2 = np.append(dpd2,0.0)       # vel = 0.0
+                d2pd2 = np.append(d2pd2,0.0)      # acel = 0.0
+                
+
+            if operaciones[y] == valvula_on:
+                index_valvula_on = np.append(index_valvula_on, t0.shape[0])
+                t0 = np.append(t0,0.5+t0[-1]) # le agrego al vector de tiempo 500ms
+                t1 = np.append(t1,0.5+t1[-1])
+                t2 = np.append(t2,0.5+t2[-1])
+                pd0 = np.append(pd0,pd0[-1])    # manteniendo la misma posicion
+                dpd0 = np.append(dpd0,0.0)       # vel = 0.0
+                d2pd0 = np.append(d2pd0,0.0)      # acel = 0.0
+                pd1 = np.append(pd1,pd1[-1])    # manteniendo la misma posicion
+                dpd1 = np.append(dpd1,0.0)       # vel = 0.0
+                d2pd1 = np.append(d2pd1,0.0)      # acel = 0.0
+                pd2 = np.append(pd2,pd2[-1])    # manteniendo la misma posicion
+                dpd2 = np.append(dpd2,0.0)       # vel = 0.0
+                d2pd2 = np.append(d2pd2,0.0)      # acel = 0.0
+
+            if operaciones[y] == valvula_off:
+                index_valvula_off = np.append(index_valvula_off, t0.shape[0])
+                t0 = np.append(t0,0.5+t0[-1]) # le agrego al vector de tiempo 500ms
+                t1 = np.append(t1,0.5+t1[-1])
+                t2 = np.append(t2,0.5+t2[-1])
+                pd0 = np.append(pd0,pd0[-1])    # manteniendo la posicion HOME X
+                dpd0 = np.append(dpd0,0.0)       # vel = 0.0
+                d2pd0 = np.append(d2pd0,0.0)      # acel = 0.0
+                pd1 = np.append(pd1,pd1[-1])    # manteniendo la posicion HOME Y
+                dpd1 = np.append(dpd1,0.0)       # vel = 0.0
+                d2pd1 = np.append(d2pd1,0.0)      # acel = 0.0
+                pd2 = np.append(pd2,pd2[-1])    # manteniendo la posicion HOME Z
+                dpd2 = np.append(dpd2,0.0)       # vel = 0.0
+                d2pd2 = np.append(d2pd2,0.0)      # acel = 0.0
+
+            if operaciones[y] == herramienta:
+                index_herramienta = np.append(index_herramienta, t0.shape[0])
+                herramientas = np.append(herramientas, Ps[y][0])
+                t0 = np.append(t0,10.0+t0[-1]) # le agrego al vector de tiempo 10s
+                t1 = np.append(t1,10.0+t1[-1])
+                t2 = np.append(t2,10.0+t2[-1])
+                pd0 = np.append(pd0,home_pos[0])    # manteniendo la posicion HOME X
+                dpd0 = np.append(dpd0,0.0)       # vel = 0.0
+                d2pd0 = np.append(d2pd0,0.0)      # acel = 0.0
+                pd1 = np.append(pd1,home_pos[1])    # manteniendo la posicion HOME Y
+                dpd1 = np.append(dpd1,0.0)       # vel = 0.0
+                d2pd1 = np.append(d2pd1,0.0)      # acel = 0.0
+                pd2 = np.append(pd2,home_pos[2])    # manteniendo la posicion HOME Z
+                dpd2 = np.append(dpd2,0.0)       # vel = 0.0
+                d2pd2 = np.append(d2pd2,0.0)      # acel = 0.0
+            
+            if (operaciones[y] == movimiento) & (operaciones[y+1] == movimiento):
+                t, pd, dpd, d2pd = func(tiempos[y], Ps[y,0], Ps[y+1,0])
+                t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
+                t0 = np.append(t0,np.add(t,t0[-1]))
+                pd0 = np.append(pd0,pd)
+                dpd0 = np.append(dpd0,dpd)
+                d2pd0 = np.append(d2pd0,d2pd)
+
+                t, pd, dpd, d2pd = func(tiempos[y], Ps[y,1], Ps[y+1,1])
+                t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
+                t1 = np.append(t1,np.add(t,t1[-1]))
+                pd1 = np.append(pd1,pd)
+                dpd1 = np.append(dpd1,dpd)
+                d2pd1 = np.append(d2pd1,d2pd)
+
+                t, pd, dpd, d2pd = func(tiempos[y], Ps[y,2], Ps[y+1,2])
+                t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
+                t2 = np.append(t2,np.add(t,t2[-1]))
+                pd2 = np.append(pd2,pd)
+                dpd2 = np.append(dpd2,dpd)
+                d2pd2 = np.append(d2pd2,d2pd)
+
+            elif (operaciones[y] != movimiento) & (operaciones[y+1] == movimiento) & (y>0):
+                t, pd, dpd, d2pd = func(tiempos[y-1], Ps[y-1,0], Ps[y+1,0])
+                t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
+                t0 = np.append(t0,np.add(t,t0[-1]))
+                pd0 = np.append(pd0,pd)
+                dpd0 = np.append(dpd0,dpd)
+                d2pd0 = np.append(d2pd0,d2pd)
+
+                t, pd, dpd, d2pd = func(tiempos[y-1], Ps[y-1,1], Ps[y+1,1])
+                t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
+                t1 = np.append(t1,np.add(t,t1[-1]))
+                pd1 = np.append(pd1,pd)
+                dpd1 = np.append(dpd1,dpd)
+                d2pd1 = np.append(d2pd1,d2pd)
+
+                t, pd, dpd, d2pd = func(tiempos[y-1], Ps[y-1,2], Ps[y+1,2])
+                t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
+                t2 = np.append(t2,np.add(t,t2[-1]))
+                pd2 = np.append(pd2,pd)
+                dpd2 = np.append(dpd2,dpd)
+                d2pd2 = np.append(d2pd2,d2pd)
+
+        index_herramienta = np.append(index_herramienta, t0.shape[0])
+        herramientas = np.append(herramientas, Ps[-1][0])
+        t0 = np.append(t0,10.0+t0[-1]) # le agrego al vector de tiempo 10s
+        t1 = np.append(t1,10.0+t1[-1])
+        t2 = np.append(t2,10.0+t2[-1])
+        pd0 = np.append(pd0,home_pos[0])    # manteniendo la posicion HOME X
+        dpd0 = np.append(dpd0,0.0)       # vel = 0.0
+        d2pd0 = np.append(d2pd0,0.0)      # acel = 0.0
+        pd1 = np.append(pd1,home_pos[1])    # manteniendo la posicion HOME Y
+        dpd1 = np.append(dpd1,0.0)       # vel = 0.0
+        d2pd1 = np.append(d2pd1,0.0)      # acel = 0.0
+        pd2 = np.append(pd2,home_pos[2])    # manteniendo la posicion HOME Z
+        dpd2 = np.append(dpd2,0.0)       # vel = 0.0
+        d2pd2 = np.append(d2pd2,0.0)      # acel = 0.0
+
+        index_soldaduras = index_soldaduras[1:]
+        pulsos_soldaduras = pulsos_soldaduras[1:]
+        index_valvula_on = index_valvula_on[1:]
+        index_valvula_off = index_valvula_off[1:]
+        index_herramienta = index_herramienta[1:]
+        herramientas = herramientas[1:]
+        
+        ts = np.array([t0, t1, t2])
+        pds = np.array([pd0, pd1, pd2])
+        dpds = np.array([dpd0, dpd1, dpd2])
+        d2pds = np.array([d2pd0, d2pd1, d2pd2])
+
+        qds = np.zeros(ts.shape)
+        dqds = np.zeros(ts.shape)
+        d2qds = np.zeros(ts.shape)
+
+        for x in range(pds.shape[1]):
+            q1, q2, q3, err = DeltaIK(px=pds[0,x], py=pds[1,x], pz=pds[2,x])
+            if(err != 0):
+                print("error")
+                return ts, qds, pds, err
+            qds[:,x] = [q1, q2, q3]
+
+        for x in range(ts.shape[0]):
+            dqds[x] = np.gradient(qds[x], ts[x])
+            d2qds[x] = np.gradient(dqds[x], ts[x])
+        
+        # Escritura de archivo para comunicacion serial con ESP32
+        for x in range(ts.shape[1]):
+            if(x==index_soldaduras[cont_sold]):
+                if(cont_sold<len(index_soldaduras)-1): cont_sold += 1
+                f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'S ' + "%.5f" % pulsos_soldaduras[cont_sold] + '\n')
+                # f.writelines("%.4f" % ts[0][x] + ' ' + 
+                #              'M123 ' + "%.5f" % qds[0][x] + ' ' + "%.5f" % dqds[0][x] + ' ' + "%.5f" % d2qds[0][x]
+                #                + ' ' + "%.5f" % qds[1][x] + ' ' + "%.5f" % dqds[1][x] + ' ' + "%.5f" % d2qds[1][x]
+                #                + ' ' + "%.5f" % qds[2][x] + ' ' + "%.5f" % dqds[2][x] + ' ' + "%.5f" % d2qds[2][x]
+                #                + '\n')
+            elif(x==index_valvula_on[cont_valv_on]):
+                if(cont_valv_on<len(index_valvula_on)-1): cont_valv_on += 1
+                f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'V1\n')
+            elif(x==index_valvula_off[cont_valv_off]):
+                if(cont_valv_off<len(index_valvula_off)-1):cont_valv_off += 1
+                f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'V0\n')
+            elif(x==index_herramienta[cont_herr]):
+                if(cont_herr<len(index_herramienta)-1):cont_herr += 1
+                f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'H' + "%.0f" % herramientas[cont_herr] + '\n')
+            else:
+                f.writelines("%.4f" % ts[0][x] + ' ' + 
+                             'M123 ' + "%.5f" % qds[0][x] + ' ' + "%.5f" % dqds[0][x] + ' ' + "%.5f" % d2qds[0][x]
+                               + ' ' + "%.5f" % qds[1][x] + ' ' + "%.5f" % dqds[1][x] + ' ' + "%.5f" % d2qds[1][x]
+                               + ' ' + "%.5f" % qds[2][x] + ' ' + "%.5f" % dqds[2][x] + ' ' + "%.5f" % d2qds[2][x]
+                               + '\n')
+
+        ts_ = np.arange(start=0, stop=ts[0,-1], step=step)
+        qds_ = np.zeros((3,ts_.shape[0]))
+        dqds_ = np.zeros((3,ts_.shape[0]))
+        d2qds_ = np.zeros((3,ts_.shape[0]))
+        cont = 0
+        for x in range(ts_.shape[0]):
+            if ts_[x] <= ts[0,cont+1]:
+                qds_[:,x] = qds[:,cont]
+                dqds_[:,x] = dqds[:,cont]
+                d2qds_[:,x] = d2qds[:,cont]
+            else:
+                cont += 1
+                qds_[:,x] = qds[:,cont]
+                dqds_[:,x] = dqds[:,cont]
+                d2qds_[:,x] = d2qds[:,cont]
     
     return ts_, ts, qds_, dqds_, d2qds_, qds, dqds, d2qds, pds, dpds, d2pds, err
 
@@ -602,13 +788,14 @@ def componentesclass_to_puntos(pnp_lista, altura_pcb, altura_pnp):
 
 def soldaduraclass_to_puntos2(soldadura_lista, altura_pcb):
     i = 4
-    puntos = np.zeros((len(soldadura_lista)*i+1,5), dtype=float)
-    puntos[0,:] = np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500])
+    puntos = np.zeros((len(soldadura_lista)*i+2,5), dtype=float)
+    puntos[0,:] = np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500])    # HOME
     for x in range(len(soldadura_lista)):
-        puntos[x*i+1:x*i+i+1,:] = [np.array([movimiento, soldadura_lista[x].x, soldadura_lista[x].y, altura_pcb-5, 25]),
-                            np.array([movimiento, soldadura_lista[x].x, soldadura_lista[x].y, altura_pcb, 25]),
-                            np.array([movimiento, soldadura_lista[x].x, soldadura_lista[x].y, altura_pcb-5, 500]),
-                            np.array([soldadura, soldadura_lista[x].cantidad, 0, 0, 0])]
+        puntos[x*i+1:x*i+i+1,:] = [np.array([movimiento, soldadura_lista[x].x, soldadura_lista[x].y, altura_pcb-5, 25]), # pos de pcb(x,y) + 5 mm de altura
+                            np.array([movimiento, soldadura_lista[x].x, soldadura_lista[x].y, altura_pcb, 25]), # baja a pcb
+                            np.array([soldadura, soldadura_lista[x].cantidad, 0, 0, 0]), # enciende el dispensador
+                            np.array([movimiento, soldadura_lista[x].x, soldadura_lista[x].y, altura_pcb-5, 500])] # # pos de pcb (x,y) + 5 mm de altura
+    puntos[-1,:] = np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500])   # HOME
     return puntos
 
 def componentesclass_to_puntos2(pnp_lista, altura_pcb, altura_pnp):
@@ -616,7 +803,7 @@ def componentesclass_to_puntos2(pnp_lista, altura_pcb, altura_pnp):
     puntos = np.zeros((len(pnp_lista)*i+1,5), dtype=float)
     comp_x = 0
     comp_y = 0
-    puntos[0,:] = np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500])
+    puntos[0,:] = np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500]) # HOME
     for x in range(len(pnp_lista)):
         separacion = 5.0 # Separacion entre componentes
         offset_x = 100.0
@@ -633,4 +820,10 @@ def componentesclass_to_puntos2(pnp_lista, altura_pcb, altura_pnp):
         if(comp_x == 10):
             comp_x = 0
             comp_y += 1
+    puntos[-1,:] = np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500])   # HOME
     return puntos
+
+def cambio_herramienta(herr : int):
+    puntos_cambio = np.zeros([1,5])
+    puntos_cambio[0,:] = np.array([herramienta, herr, 0, 0, 0])   # HOME
+    return puntos_cambio

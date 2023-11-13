@@ -68,8 +68,8 @@ const int MAX_DUTY_CYCLE = (int)(pow(2, PWMResolution)-1);
 // Parametros del motor
 const float ZONA_MUERTA = 8.0; // Porcentaje PWM en donde se vence la zona muerta
 const float MAX_POS = 2*PI;
-float B = 5; // Constante de amortiguamiento
-float J = 5; // Constante de inercia
+float B = 3.310322593720104; // Constante de amortiguamiento
+float J = 0.085702607785979; // Constante de inercia
 float qd = 0.0;
 float dqd = 0.0;
 float d2qd = 0.0;
