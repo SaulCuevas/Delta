@@ -91,8 +91,8 @@ def get_matched_coordinates(temp_img, map_img):
     # plt.imshow(img3, 'gray'), plt.show()
 
     # result image path
-    cv2.imwrite(os.path.join(os.getcwd(), 'VisionArtificial/PCB/mask.jpg'), map_img)
-    cv2.imwrite(os.path.join(os.getcwd(), 'VisionArtificial/PCB/output.jpg'), img3)
+    cv2.imwrite(os.path.join(os.getcwd(), 'VisionArtificial/PCB/mask.png'), map_img)
+    cv2.imwrite(os.path.join(os.getcwd(), 'VisionArtificial/PCB/output.png'), img3)
 
     rot_deg = math.degrees(math.atan2((int(dst[1][0][0]) - int(dst[0][0][0])), (int(dst[1][0][1]) - int(dst[0][0][1]))))
     orig = dst[1][0] # punto de origen para PCBs
@@ -115,7 +115,7 @@ def inicioSVA(path : str, map_path : str, _top_bottom : bool):
     # read images
     temp_img_gray = cv2.imread('VisionArtificial/PCB/board-mask.png', 0)
     map_img = cv2.imread(map_path)
-    cv2.imwrite('VisionArtificial/PCB/from.jpg', map_img)
+    cv2.imwrite('VisionArtificial/PCB/from.png', map_img)
 
     # image segmentation
     # """
@@ -159,9 +159,9 @@ def inicioSVA(path : str, map_path : str, _top_bottom : bool):
         if(x.angulo) > 360.0: x.angulo -= 360.0
 
     herr_soldadura = Trayectorias.cambio_herramienta(dispensador)
-    puntos_soldadura = Trayectorias.soldaduraclass_to_puntos2(soldadura_lista, 400) 
+    puntos_soldadura = Trayectorias.soldaduraclass_to_puntos(soldadura_lista, 400) 
     herr_pnp = Trayectorias.cambio_herramienta(pnp)
-    puntos_pnp = Trayectorias.componentesclass_to_puntos2(componentes_lista, 400, 420)
+    puntos_pnp = Trayectorias.componentesclass_to_puntos(componentes_lista, 400, 420)
     herr_cam = Trayectorias.cambio_herramienta(camara)
 
     puntos = np.append(herr_soldadura, puntos_soldadura, axis=0)

@@ -85,7 +85,7 @@ COMANDOS DISPONIBLES:
 // Direcciones I2C
 const int MT6701_ADDRESS = 0x06;
 const int PCA9548A_ADDRESS = 0x70;
-bool i2c_not_present = true;
+bool i2c_not_present[7] = {true, true, true, true, true, true, true};
 
 // Tiempo de muestreo
 unsigned long lastTime = 0; // Tiempo anterior
@@ -160,12 +160,12 @@ const float vel_alta = 80.0;
 const float vel_baja = 20.0;
 const float max_pos_herr = 100.0;
 const float min_pos_herr = -100.0;
-float pos_herramienta_0 = 0.0;
+float pos_herramienta_0 = -5.85;
 float pos_herramienta_1 = 0.0;
 float pos_herramienta_2 = 0.0;
 
 // Parametros del PID
-const float error_min = 0.001;
+const float error_min = 0.006;
 const float T = 5.0/1000.0;
 // const float Kp = 1412.13; // 28GP-385 25RPM
 // const float Ki = 0.0; // 28GP-385 25RPM
@@ -192,6 +192,8 @@ float z_1[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 float z[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 float u_1[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 float u[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+TaskHandle_t Lectura;
 
 void setup() {
   // Se configuran los pines de salida
@@ -249,68 +251,157 @@ void setup() {
   Wire.begin();
   Wire.setTimeout(1);
   PCA9548A_cambio_direccion(0,1);
-  angulo_real[0] = leerMT6701();
+  angulo_real[0] = leerMT6701(0);
   PCA9548A_cambio_direccion(1,1);
-  angulo_real[1] = leerMT6701();
+  angulo_real[1] = leerMT6701(1);
   PCA9548A_cambio_direccion(2,1);
-  angulo_real[2] = leerMT6701();
+  angulo_real[2] = leerMT6701(2);
   PCA9548A_cambio_direccion(3,1);
-  angulo_real[3] = leerMT6701();
+  angulo_real[3] = leerMT6701(3);
   PCA9548A_cambio_direccion(4,1);
-  angulo_real[4] = leerMT6701();
+  angulo_real[4] = leerMT6701(4);
   PCA9548A_cambio_direccion(5,1);
-  angulo_real[5] = leerMT6701();
-  
-  Serial.begin(250000);
+  angulo_real[5] = leerMT6701(5);
+
+  Serial.begin(250000);     
+
+  xTaskCreatePinnedToCore(
+                    LecturaLoop,   /* Task function. */
+                    "Lectura",     /* name of task. */
+                    10000,       /* Stack size of task */
+                    NULL,        /* parameter of the task */
+                    tskIDLE_PRIORITY,           /* priority of the task */
+                    &Lectura,      /* Task handle to keep track of created task */
+                    0);          /* pin task to core 0 */
 }
 
-void loop() {
-  if (strComplete) {
+// Se encarga de leer el puerto serial y comunicacion I2C
+void LecturaLoop( void * pvParameters ){
+  for(;;){
+    if (strComplete) {
       descifrar_comando();
       str = "";
       strComplete = false;
     }
-  if(millis() - lastTime >= sampleTime){
-    // Control en conjunto de los motores delta
+    bool hit_limit = digitalRead(pinLIMIT_SW);
+    if(hit_limit == true) {
+      flag_control_M5 = false; 
+      Serial.println("STOP");
+    }
+    if(hit_limit == false) {
+      flag_control_M5 = false; 
+      Serial.println("DONT STOP");
+    }
+    // long loopTime = millis();
+    // Lectura en conjunto de los motores delta
     if(flag_control_M123){
       PCA9548A_cambio_direccion(0,1);
       angulo_1[0]= angulo[0];
-      angulo[0] = leerMT6701();
-      if( i2c_not_present ) setMotor(0.0, PWMChannelIN1_0, PWMChannelIN2_0);
-      else{
-        if( (angulo[0]>(MAX_POS*0.9)) && (angulo_1[0]<(MAX_POS*0.1)) ) offset[0]--;
-        if( (angulo[0]<(MAX_POS*0.1)) && (angulo_1[0]>(MAX_POS*0.9)) ) offset[0]++;
-
-        angulo_real_1[0] = angulo_real[0];
-        angulo_real[0] = angulo[0] + offset[0]*MAX_POS;
-        PWMvalue[0] = calcularPIDFF(0, qds[0], dqds[0], d2qds[0], angulo_real[0]);
-        setMotor(PWMvalue[0], PWMChannelIN1_0, PWMChannelIN2_0);
-      }
+      angulo[0] = leerMT6701(0);
 
       PCA9548A_cambio_direccion(1,1);
       angulo_1[1]= angulo[1];
-      angulo[1] = leerMT6701();
-      if( i2c_not_present ) setMotor(0.0, PWMChannelIN1_0, PWMChannelIN2_0);
-      else{
-        if( (angulo[1]>(MAX_POS*0.9)) && (angulo_1[1]<(MAX_POS*0.1)) ) offset[1]--;
-        if( (angulo[1]<(MAX_POS*0.1)) && (angulo_1[1]>(MAX_POS*0.9)) ) offset[1]++;
-
-        angulo_real_1[1] = angulo_real[1];
-        angulo_real[1] = angulo[1] + offset[1]*MAX_POS;
-        PWMvalue[1] = calcularPIDFF(1, qds[1], dqds[1], d2qds[1], angulo_real[1]);
-        setMotor(PWMvalue[1], PWMChannelIN1_1, PWMChannelIN2_1);
-      }
+      angulo[1] = leerMT6701(1);
 
       PCA9548A_cambio_direccion(2,1);
       angulo_1[2]= angulo[2];
-      angulo[2] = leerMT6701();
-      if( i2c_not_present ) setMotor(0.0, PWMChannelIN1_2, PWMChannelIN2_2);
-      else{
-        if( (angulo[2]>(MAX_POS*0.9)) && (angulo_1[2]<(MAX_POS*0.1)) ) offset[2]--;
-        if( (angulo[2]<(MAX_POS*0.1)) && (angulo_1[2]>(MAX_POS*0.9)) ) offset[2]++;
+      angulo[2] = leerMT6701(2);
+    }
+    // Lectura individual de cada motor
+    // Motor Delta 1
+    if(flag_control_M1){
+      PCA9548A_cambio_direccion(0,1);
+      angulo_1[0]= angulo[0];
+      angulo[0] = leerMT6701(0);
+      if( (angulo[0]>(MAX_POS*0.9)) && (angulo_1[0]<(MAX_POS*0.1)) ) offset[0]--;
+      if( (angulo[0]<(MAX_POS*0.1)) && (angulo_1[0]>(MAX_POS*0.9)) ) offset[0]++;
+      angulo_real_1[0] = angulo_real[0];
+      angulo_real[0] = angulo[0] + offset[0]*MAX_POS;
+    }
+    // Motor Delta 2
+    if(flag_control_M2){
+      PCA9548A_cambio_direccion(1,1);
+      angulo_1[1]= angulo[1];
+      angulo[1] = leerMT6701(1);
+      if( (angulo[1]>(MAX_POS*0.9)) && (angulo_1[1]<(MAX_POS*0.1)) ) offset[1]--;
+      if( (angulo[1]<(MAX_POS*0.1)) && (angulo_1[1]>(MAX_POS*0.9)) ) offset[1]++;
+      angulo_real_1[1] = angulo_real[1];
+      angulo_real[1] = angulo[1] + offset[1]*MAX_POS;
+    }
+    // Motor Delta 3
+    if(flag_control_M3){
+      PCA9548A_cambio_direccion(2,1);
+      angulo_1[2]= angulo[2];
+      angulo[2] = leerMT6701(2);
+      if( (angulo[2]>(MAX_POS*0.9)) && (angulo_1[2]<(MAX_POS*0.1)) ) offset[2]--;
+      if( (angulo[2]<(MAX_POS*0.1)) && (angulo_1[2]>(MAX_POS*0.9)) ) offset[2]++;
+      angulo_real_1[2] = angulo_real[2];
+      angulo_real[2] = angulo[2] + offset[2]*MAX_POS;
+    }
+    // Motor Manipulador
+    if(flag_control_M4){
+      PCA9548A_cambio_direccion(3,1);
+      angulo_1[3]= angulo[3];
+      angulo[3] = leerMT6701(3);
+      if( (angulo[3]>(MAX_POS*0.9)) && (angulo_1[3]<(MAX_POS*0.1)) ) offset[3]--;
+      if( (angulo[3]<(MAX_POS*0.1)) && (angulo_1[3]>(MAX_POS*0.9)) ) offset[3]++;
+      angulo_real_1[3] = angulo_real[3];
+      angulo_real[3] = angulo[3] + offset[3]*MAX_POS;
+    }
+    // Motor Cambio de Herramienta
+    if(flag_control_M5){
+      PCA9548A_cambio_direccion(4,1);
+      angulo_1[4]= angulo[4];
+      angulo[4] = leerMT6701(4);
+      if( (angulo[4]>(MAX_POS*0.9)) && (angulo_1[4]<(MAX_POS*0.1)) ) offset[4]--;
+      if( (angulo[4]<(MAX_POS*0.1)) && (angulo_1[4]>(MAX_POS*0.9)) ) offset[4]++;
+      angulo_real_1[4] = angulo_real[4];
+      angulo_real[4] = angulo[4] + offset[4]*MAX_POS;
+    }
+    // Motor Inventario
+    if(flag_control_M6){
+      PCA9548A_cambio_direccion(5,1);
+      angulo_1[5]= angulo[5];
+      angulo[5] = leerMT6701(5);
+      if( (angulo[5]>(MAX_POS*0.9)) && (angulo_1[5]<(MAX_POS*0.1)) ) offset[5]--;
+      if( (angulo[5]<(MAX_POS*0.1)) && (angulo_1[5]>(MAX_POS*0.9)) ) offset[5]++;
+      angulo_real_1[5] = angulo_real[5];
+      angulo_real[5] = angulo[5] + offset[5]*MAX_POS;
+    }
+    // loopTime = millis() - loopTime;
+    // Serial.println(loopTime);
+    if(millis() - lastTime >= sampleTime){
+      // Muestra los valores para monitorear el comportamiento del PID
+      if(flag_mostrar_valores_PID){   
+        int motorprint = 4;
+        // Serial.print("PosRef:"); Serial.print(qds[0],5); Serial.print(",");
+        Serial.print("PosRef:"); Serial.print(qds[motorprint],5); Serial.print(",");
+        Serial.print("Pos:"); Serial.print(angulo_real[motorprint],5); Serial.print(",");
+        Serial.print("Error:"); Serial.print(error[motorprint],5); Serial.print(",");
+        Serial.print("PID:"); Serial.println(PWMvalue[motorprint],5);
+      }
+    }
+  }
+}
 
-        angulo_real_1[2] = angulo_real[2];
-        angulo_real[2] = angulo[2] + offset[2]*MAX_POS;
+void loop() {
+  if(millis() - lastTime >= sampleTime){
+    // Control en conjunto de los motores delta
+    if(flag_control_M123){
+      if( i2c_not_present[0] ) setMotor(0.0, PWMChannelIN1_0, PWMChannelIN2_0);
+      else{
+        PWMvalue[0] = calcularPID(0, qds[0], angulo_real[0]);
+        setMotor(PWMvalue[0], PWMChannelIN1_0, PWMChannelIN2_0);
+      }
+
+      if( i2c_not_present[1] ) setMotor(0.0, PWMChannelIN1_1, PWMChannelIN2_1);
+      else{
+        PWMvalue[1] = calcularPID(1, qds[1], angulo_real[1]);
+        setMotor(PWMvalue[1], PWMChannelIN1_1, PWMChannelIN2_1);
+      }
+
+      if( i2c_not_present[2] ) setMotor(0.0, PWMChannelIN1_2, PWMChannelIN2_2);
+      else{
         PWMvalue[2] = calcularPIDFF(2, qds[2], dqds[2], d2qds[2], angulo_real[2]);
         setMotor(PWMvalue[2], PWMChannelIN1_2, PWMChannelIN2_2);
       }
@@ -318,67 +409,35 @@ void loop() {
     // Control individual de cada motor
     // Motor Delta 1
     if(flag_control_M1){
-      PCA9548A_cambio_direccion(0,1);
-      angulo_1[0]= angulo[0];
-      angulo[0] = leerMT6701();
-      if( i2c_not_present ) setMotor(0.0, PWMChannelIN1_0, PWMChannelIN2_0);
+      if( i2c_not_present[0] ) setMotor(0.0, PWMChannelIN1_0, PWMChannelIN2_0);
       else{
-        if( (angulo[0]>(MAX_POS*0.9)) && (angulo_1[0]<(MAX_POS*0.1)) ) offset[0]--;
-        if( (angulo[0]<(MAX_POS*0.1)) && (angulo_1[0]>(MAX_POS*0.9)) ) offset[0]++;
-
-        angulo_real_1[0] = angulo_real[0];
-        angulo_real[0] = angulo[0] + offset[0]*MAX_POS;
         PWMvalue[0] = calcularPID(0, qds[0], angulo_real[0]);
         setMotor(PWMvalue[0], PWMChannelIN1_0, PWMChannelIN2_0);
       }
     }
     // Motor Delta 2
     if(flag_control_M2){
-      PCA9548A_cambio_direccion(1,1);
-      angulo_1[1]= angulo[1];
-      angulo[1] = leerMT6701();
-      if( i2c_not_present ) setMotor(0.0, PWMChannelIN1_1, PWMChannelIN2_1);
+      if( i2c_not_present[1] ) setMotor(0.0, PWMChannelIN1_1, PWMChannelIN2_1);
       else{
-        if( (angulo[1]>(MAX_POS*0.9)) && (angulo_1[1]<(MAX_POS*0.1)) ) offset[1]--;
-        if( (angulo[1]<(MAX_POS*0.1)) && (angulo_1[1]>(MAX_POS*0.9)) ) offset[1]++;
-
-        angulo_real_1[1] = angulo_real[1];
-        angulo_real[1] = angulo[1] + offset[1]*MAX_POS;
         PWMvalue[1] = calcularPID(1, qds[1], angulo_real[1]);
         setMotor(PWMvalue[1], PWMChannelIN1_1, PWMChannelIN2_1);
       }
     }
     // Motor Delta 3
     if(flag_control_M3){
-      PCA9548A_cambio_direccion(2,1);
-      angulo_1[2]= angulo[2];
-      angulo[2] = leerMT6701();
-      if( i2c_not_present ) setMotor(0.0, PWMChannelIN1_2, PWMChannelIN2_2);
+      if( i2c_not_present[2] ) setMotor(0.0, PWMChannelIN1_2, PWMChannelIN2_2);
       else{
-        if( (angulo[2]>(MAX_POS*0.9)) && (angulo_1[2]<(MAX_POS*0.1)) ) offset[2]--;
-        if( (angulo[2]<(MAX_POS*0.1)) && (angulo_1[2]>(MAX_POS*0.9)) ) offset[2]++;
-
-        angulo_real_1[2] = angulo_real[2];
-        angulo_real[2] = angulo[2] + offset[2]*MAX_POS;
         PWMvalue[2] = calcularPIDFF(2, qds[2], dqds[2], d2qds[2], angulo_real[2]);
         setMotor(PWMvalue[2], PWMChannelIN1_2, PWMChannelIN2_2);
       }
     }
     // Motor Manipulador
     if(flag_control_M4){
-      PCA9548A_cambio_direccion(3,1);
-      angulo_1[3]= angulo[3];
-      angulo[3] = leerMT6701();
-      if( i2c_not_present ) setMotor(0.0, PWMChannelIN1_3, PWMChannelIN2_3);
+      if( i2c_not_present[3] ) setMotor(0.0, PWMChannelIN1_3, PWMChannelIN2_3);
       else{
-        if( (angulo[3]>(MAX_POS*0.9)) && (angulo_1[3]<(MAX_POS*0.1)) ) offset[3]--;
-        if( (angulo[3]<(MAX_POS*0.1)) && (angulo_1[3]>(MAX_POS*0.9)) ) offset[3]++;
-
-        angulo_real_1[3] = angulo_real[3];
-        angulo_real[3] = angulo[3] + offset[3]*MAX_POS;
         PWMvalue[3] = calcularPID(3, qds[3], angulo_real[3]);
         setMotor(PWMvalue[3], PWMChannelIN1_3, PWMChannelIN2_3);
-        if(error[3] < error_min){
+        if(abs(error[3]) < error_min){
           setMotor(0.0, PWMChannelIN1_3, PWMChannelIN2_3);
           flag_control_M4 = false;
         }
@@ -386,20 +445,11 @@ void loop() {
     }
     // Motor Cambio de Herramienta
     if(flag_control_M5){
-      PCA9548A_cambio_direccion(4,1);
-      angulo_1[4]= angulo[4];
-      angulo[4] = leerMT6701();
-      if( i2c_not_present ) setMotor(0.0, PWMChannelIN1_4, PWMChannelIN2_4);
+      if( i2c_not_present[4] ) setMotor(0.0, PWMChannelIN1_4, PWMChannelIN2_4);
       else{
-        if( (angulo[4]>(MAX_POS*0.9)) && (angulo_1[4]<(MAX_POS*0.1)) ) offset[4]--;
-        if( (angulo[4]<(MAX_POS*0.1)) && (angulo_1[4]>(MAX_POS*0.9)) ) offset[4]++;
-
-        angulo_real_1[4] = angulo_real[4];
-        angulo_real[4] = angulo[4] + offset[4]*MAX_POS;
         PWMvalue[4] = calcularPID(4, qds[4], angulo_real[4]);
         setMotor(PWMvalue[4], PWMChannelIN1_4, PWMChannelIN2_4);
-
-        if(error[4] < error_min){
+        if(abs(error[4]) < error_min){
           setMotor(0.0, PWMChannelIN1_4, PWMChannelIN2_4);
           flag_control_M5 = false;
         }
@@ -407,36 +457,20 @@ void loop() {
     }
     // Motor Inventario
     if(flag_control_M6){
-      PCA9548A_cambio_direccion(5,1);
-      angulo_1[5]= angulo[5];
-      angulo[5] = leerMT6701();
-      if( i2c_not_present ) setMotor(0.0, PWMChannelIN1_5, PWMChannelIN2_5);
+      if( i2c_not_present[5] ) setMotor(0.0, PWMChannelIN1_5, PWMChannelIN2_5);
       else{
-        if( (angulo[5]>(MAX_POS*0.9)) && (angulo_1[5]<(MAX_POS*0.1)) ) offset[5]--;
-        if( (angulo[5]<(MAX_POS*0.1)) && (angulo_1[5]>(MAX_POS*0.9)) ) offset[5]++;
-
-        angulo_real_1[5] = angulo_real[5];
-        angulo_real[5] = angulo[5] + offset[5]*MAX_POS;
         PWMvalue[5] = calcularPID(5, qds[5], angulo_real[5]);
         setMotor(PWMvalue[5], PWMChannelIN1_5, PWMChannelIN2_5);
-
-        if(error[5] < error_min){
+        if(abs(error[5]) < error_min){
           setMotor(0.0, PWMChannelIN1_5, PWMChannelIN2_5);
           flag_control_M6 = false;
         }
       }
     }
-    // Muestra los valores para monitorear el comportamiento del PID
-    if(flag_mostrar_valores_PID){      
-      // Serial.print("PosRef:"); Serial.print(qds[0],5); Serial.print(",");
-      Serial.print("PosRef:"); Serial.print(qds[0],5); Serial.print(",");
-      Serial.print("Pos:"); Serial.print(angulo_real[0],5); Serial.print(",");
-      Serial.print("Error:"); Serial.print(error[0],5); Serial.print(",");
-      Serial.print("PID:"); Serial.println(PWMvalue[0],5);
-    }
     lastTime = millis();
   }
 }
+
 
 // Funcion de evento en el puerto serial
 void serialEvent() {
@@ -588,17 +622,17 @@ void descifrar_comando(){
     case 'E':
       //Serial.println("Quieres leer los encoders");
       PCA9548A_cambio_direccion(0, 1);
-      Serial.print(leerMT6701()), Serial.print(" ");
+      Serial.print(leerMT6701(0)), Serial.print(" ");
       PCA9548A_cambio_direccion(1, 1);
-      Serial.print(leerMT6701()), Serial.print(" ");
+      Serial.print(leerMT6701(1)), Serial.print(" ");
       PCA9548A_cambio_direccion(2, 1);
-      Serial.print(leerMT6701()), Serial.print(" ");
+      Serial.print(leerMT6701(2)), Serial.print(" ");
       PCA9548A_cambio_direccion(3, 1);
-      Serial.print(leerMT6701()), Serial.print(" ");
+      Serial.print(leerMT6701(3)), Serial.print(" ");
       PCA9548A_cambio_direccion(4, 1);
-      Serial.print(leerMT6701()), Serial.print(" ");
+      Serial.print(leerMT6701(4)), Serial.print(" ");
       PCA9548A_cambio_direccion(5, 1);
-      Serial.println(leerMT6701());
+      Serial.println(leerMT6701(5));
       PCA9548A_cambio_direccion(0, 0); // reset
       break;
     // HOME a herramienta
@@ -608,16 +642,17 @@ void descifrar_comando(){
     case 'T':
       switch(comm2.toInt()) {
         case 0: // herramienta camara
-          flag_control_M4 = true;
-          qds[3] = pos_herramienta_0; 
+          flag_control_M5 = true;
+          qds[4] = pos_home_herr + pos_herramienta_0; 
+          Serial.println(qds[3]);
           break;
         case 1: // dispensador de soldadura
-          flag_control_M4 = true;
-          qds[3] = pos_herramienta_1;
+          flag_control_M5 = true;
+          qds[4] = pos_home_herr + pos_herramienta_1;
           break;
         case 2: // manipulador
-          flag_control_M4 = true;
-          qds[3] = pos_herramienta_2;
+          flag_control_M5 = true;
+          qds[4] = pos_home_herr + pos_herramienta_2;
           break;
         default:
           Serial.println("No existe esa herramienta");
@@ -630,7 +665,21 @@ void descifrar_comando(){
       else digitalWrite(pin3_VIAS, LOW), Serial.println("Valvula apagada");
       break;
     case 'X':
-      if( comm2.toInt() ) flag_mostrar_valores_PID = true;
+      if( comm2.toInt() ) {
+        flag_mostrar_valores_PID = true;
+        PCA9548A_cambio_direccion(0,1);
+        angulo_real[0] = leerMT6701(0);
+        PCA9548A_cambio_direccion(1,1);
+        angulo_real[1] = leerMT6701(1);
+        PCA9548A_cambio_direccion(2,1);
+        angulo_real[2] = leerMT6701(2);
+        PCA9548A_cambio_direccion(3,1);
+        angulo_real[3] = leerMT6701(3);
+        PCA9548A_cambio_direccion(4,1);
+        angulo_real[4] = leerMT6701(4);
+        PCA9548A_cambio_direccion(5,1);
+        angulo_real[5] = leerMT6701(5);
+      }
       else flag_mostrar_valores_PID = false;
       break;
     // STOP
@@ -642,6 +691,7 @@ void descifrar_comando(){
       setMotor(0.0, PWMChannelIN1_4, PWMChannelIN2_4);
       setMotor(0.0, PWMChannelIN1_5, PWMChannelIN2_5);
       setMotor(0.0, PWMChannelIN1_6, PWMChannelIN2_6);
+      flag_control_M123 = false;
       flag_control_M1 = false;
       flag_control_M2 = false;
       flag_control_M3 = false;
@@ -673,22 +723,27 @@ void descifrar_comando(){
 // Funcion para multiplexor I2C
 void PCA9548A_cambio_direccion(uint8_t _channel, bool _on_off) {
   Wire.beginTransmission(PCA9548A_ADDRESS);
-  Wire.write(_on_off ? (0x01 << _channel) : 0x00);
-  Wire.endTransmission();
+  i2c_not_present[6] = Wire.endTransmission();
+
+  if(i2c_not_present[6] == 0){
+    Wire.beginTransmission(PCA9548A_ADDRESS);
+    Wire.write(_on_off ? (0x01 << _channel) : 0x00);
+    Wire.endTransmission();
+  }
 }
 
-uint8_t I2C_request_single_byte(int _address, int _reg_addr) {
+uint8_t I2C_request_single_byte(int _address, int _reg_addr, int motor) {
   uint8_t single_byte = 0;
 
   Wire.beginTransmission(_address);
   Wire.write(_reg_addr);
-  i2c_not_present = Wire.endTransmission();
+  i2c_not_present[motor] = Wire.endTransmission();
 
-  if(i2c_not_present == 0){
+  if(i2c_not_present[motor] == 0){
     Wire.requestFrom(_address, 1);
     if (Wire.available() >= 1) {
       single_byte = Wire.read();
-      i2c_not_present = false;
+      i2c_not_present[motor] = false;
     }
     Wire.endTransmission();
   }
@@ -697,9 +752,9 @@ uint8_t I2C_request_single_byte(int _address, int _reg_addr) {
 }
 
 // Funcion para leer en grados el encoder magnetico
-float leerMT6701() {
-  byte slaveByte1 = I2C_request_single_byte(MT6701_ADDRESS, 0x03);
-  byte slaveByte2 = I2C_request_single_byte(MT6701_ADDRESS, 0x04);
+float leerMT6701(int motor) {
+  byte slaveByte1 = I2C_request_single_byte(MT6701_ADDRESS, 0x03, motor);
+  byte slaveByte2 = I2C_request_single_byte(MT6701_ADDRESS, 0x04, motor);
 
   uint16_t concat = ((slaveByte1 << 6) | (slaveByte2 >> 2));
 
@@ -767,19 +822,22 @@ void sinewave(float A, float w){
 
 // Homing para la herramienta
 void HOME(){
-  bool switch_herramienta = false; // Se declara variable para leer el limit switch
+  bool switch_herramienta = true; // Se declara variable para leer el limit switch
   setMotor(vel_alta, PWMChannelIN1_4, PWMChannelIN2_4); // Se inicializa el motor en velocidad alta en direccion al limit switch (verificar direccion si no cambiar todas las vels por -1)
-  while(switch_herramienta == false) switch_herramienta = digitalRead(pinLIMIT_SW); // Esperar a leer un positivo (o negativo) en el limit switch
+  switch_herramienta = digitalRead(pinLIMIT_SW);
+  while(switch_herramienta == true) switch_herramienta = digitalRead(pinLIMIT_SW); // Esperar a leer un positivo (o negativo) en el limit switch
   setMotor(0.0, PWMChannelIN1_4, PWMChannelIN2_4); // Detener el motor
   delay(100);
   setMotor(-vel_baja, PWMChannelIN1_4, PWMChannelIN2_4); // Girar en sentido contrario dos segundos
   delay(2000);
   setMotor(vel_baja, PWMChannelIN1_4, PWMChannelIN2_4); // Girar en sentido al limit switch en velocidad baja
-  while(switch_herramienta == false) switch_herramienta = digitalRead(pinLIMIT_SW); // Esperar a leer un positivo (o negativo) en el limit switch
+  switch_herramienta = digitalRead(pinLIMIT_SW);
+  while(switch_herramienta == true) switch_herramienta = digitalRead(pinLIMIT_SW); // Esperar a leer un positivo (o negativo) en el limit switch
   setMotor(0.0, PWMChannelIN1_4, PWMChannelIN2_4); // Detener el motor
   PCA9548A_cambio_direccion(4,1); // Dirigir el multiplexor I2C al encoder 5
-  pos_home_herr = leerMT6701(); // Guardar la lectura del encoder
+  pos_home_herr = leerMT6701(4); // Guardar la lectura del encoder
   flag_HOME_realizado = true;
+  Serial.println(pos_home_herr, 5);
 }
 
 // Generador de pulso 
