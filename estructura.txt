@@ -1,0 +1,65 @@
+codigo interfaz
+requirements.txt
+|_	Comunicacion
+	|_	ESP32_serial.py					# Comunicacion serial
+|_	Control
+	|_	DeltaEcuaciones.py				# Ecuaciones de cinematica y dinamica del robot delta
+	|_ 	Trayectorias.py					# Ecuaciones para generacion de trayectoria y archivo de trayectoria
+|_	temp
+	|_	carpeta con archivos CAM		# Archivos residuales
+	|_	board-bottom.png
+	|_	board-list.png
+	|_	board-mask.png
+	|_	board-top.png
+	|_	from.png
+	|_	mask.png
+	|_	output.png
+|_	tests
+	|_	test_sva_pcb.py					# Prueba de integracion de codigo
+|_	Utils
+	|_	comandos
+		|_	comandos.ino				# Codigo principal de operacion en Arduino 
+	|_	comandosRT
+		|_	comandosRT.ino				# Codigo principal de operacion en Arduino con uso de dos nucleos ESP32 mediante FreeRTOS
+	|_	ComunicacionMATLAB
+		|_	ComunicacionMATLAB.ino		# Codigo para comunicacion con MATLAB (obtencion de planta de motores) en Arduino
+	|_	DeltaKinematics
+		|_	Cinematica.m
+		|_	Cuboid.m
+		|_	DeltaCalculoFK.m
+		|_	DeltaCalculoIK.m
+		|_	DeltaFK.m
+		|_	DeltaIK.m
+		|_	DeltaKinematics.mlapp		# Aplicacion en MATLAB para la visualizacion de un robot delta
+		|_	DeltaPlot.m
+		|_	DeltaPlotUIAxes.m
+		|_	DeltaPlotWS.m
+		|_	DeltaWorkSpace.m
+		|_	Dinamica.m
+		|_	esfera.m
+		|_	Logo_IPN.png
+		|_	Logo_UPIITA.png
+		|_	plotcube.m
+		|_	plotcubeUIAxes.m
+		|_	Ps.mat
+		|_	Qs.mat
+		|_	Singularidades.mat
+		|_	test.m
+	|_	doc								# Archivos para elaboracion de documento
+	|_	multiplexor_I2C
+		|_	multiplexor_I2C.ino			# Codigo de prueba para comunicarse con el multiplexor I2C en Arduino
+	|_	Sintonizacion PID
+		|_	28GP_C.mat					# Archivo MATLAB con parametros del PID para el motor 28GP
+		|_	28GP_out.mat				# Archivo MATLAB los datos de entrada y salida del motor 28GP
+		|_	28GP_Plant1.mat				# Archivo MATLAB con la planta identificada del motor 28GP
+		|_	JGY_C.mat					# Archivo MATLAB con parametros del PID para el motor JGY
+		|_	JGY_out.mat					# Archivo MATLAB los datos de entrada y salida del motor JGY
+		|_	JGY_Plant1.mat				# Archivo MATLAB con la planta identificada del motor JGY
+		|_	obtencion_datos_ESP32.slx	# Codigo Simulink para recepcion y envio de datos con la ESP32
+		|_	PIDTuning_comparacion.slx	# Codigo en Simulink para comparacion de sintonizaciones
+		|_	PIDTuning_obtencion.slx		# Codigo en Simulink para la obtencion de parametros para sintonizacion
+		|_	PIDTuning.m					# Codigo en MATLAB para sintonizacion PID
+	|_	DeltaJob.cam					# Archivo para fabricacion de PCBs en Fusion360
+|_	Vision Artificial
+	|_	interprete_gerber.py			# Interpretacion de archivos gerber
+	|_	SVA_PCB.py						# SVA para identificacion de PCB (offsetXY y rotacion)
