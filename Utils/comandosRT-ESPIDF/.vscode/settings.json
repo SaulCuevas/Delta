@@ -1,0 +1,20 @@
+{
+    "C_Cpp.intelliSenseEngine": "default",
+    "idf.portWin": "COM5",
+    "idf.flashType": "UART",
+    "idf.adapterTargetName": "esp32",
+    "files.associations": {
+      "queue.h": "c",
+      "gpio.h": "c",
+      "uart.h": "c",
+      "timers.h": "c",
+      "inttypes.h": "c",
+      "ledc.h": "c",
+      "stdbool.h": "c",
+      "soc_caps.h": "c",
+      "clk_tree_defs.h": "c",
+      "i2c.h": "c",
+      "semphr.h": "c"
+    }
+  }
+  

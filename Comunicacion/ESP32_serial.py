@@ -3,7 +3,7 @@ import time
 
 port = 'COM5'
 baudrate = 250000
-timeout = 0.001
+timeout = 0.01
 
 # herramientas
 camara = 0
@@ -66,61 +66,88 @@ def stop_serial(ser):
     ser.close()
 
 def read_ESP32(ser):
-    data = ser.read_until('\n')
-    data = data.strip()
-    return data.decode()
+    # data = ser.read_until('\n')
+    data = ser.readline()
+    data = data.strip(b'\n')
+    return data.decode('ascii')
 
 def write_ESP32(ser, toSend : bytearray):
     ser.write(toSend+b'\n')
 
-def encender_valvula():
-    write_ESP32(b'V1')
+def encender_valvula(ser):
+    write_ESP32(ser, b'V1')
 
-def apagar_valvula():
-    write_ESP32(b'V0')
+def apagar_valvula(ser):
+    write_ESP32(ser, b'V0')
 
-def pulso_soldadura(amplitud : float, ancho_pulso : float):
+def pulso_soldadura(ser, amplitud : float, ancho_pulso : float):
     amplitud = b'%.5f' % amplitud
     ancho_pulso = b'%.5f' % ancho_pulso
-    write_ESP32(b'S ' + amplitud + b' ' + ancho_pulso)
+    write_ESP32(ser, b'S ' + amplitud + b' ' + ancho_pulso)
+    
+def pulso_motor(ser, motor : int, amplitud : float, ancho_pulso : float):
+    motor = b'%i' % motor
+    amplitud = b'%.5f' % amplitud
+    ancho_pulso = b'%.5f' % ancho_pulso
+    write_ESP32(ser, b'U' + motor + b' ' + amplitud + b' ' + ancho_pulso)
 
-def cambio_herramienta(herramienta : int):
+def cambio_herramienta(ser, herramienta : int):
     herramienta = b'%i' % herramienta
-    write_ESP32(b'H' + herramienta)
+    write_ESP32(ser, b'T' + herramienta)
 
-def mover_motor(motor : int, pos : float):
+def mover_motor(ser, motor : int, pos : float):
     motor = b'%i' % motor
     pos = b'%.5f' % pos
-    write_ESP32(b'M' + motor + b' ' + pos)
+    write_ESP32(ser, b'M' + motor + b' ' + pos)
 
-def desactivar_motores():
-    write_ESP32(b'-')
+def desactivar_motores(ser):
+    write_ESP32(ser, b'-')
 
-def leer_encoders():
-    write_ESP32(b'E')
-    return read_ESP32()
+def leer_encoders(ser):
+    write_ESP32(ser, b'E')
+    return read_ESP32(ser)
 
-def HOME_herramienta():
-    write_ESP32(b'H')
+def HOME_herramienta(ser):
+    write_ESP32(ser, b'H')
 
-def activar_monitoreo():
-    write_ESP32(b'X1')
+def activar_monitoreo(ser):
+    write_ESP32(ser, b'X1')
 
-def desactivar_monitoreo():
-    write_ESP32(b'X0')
+def desactivar_monitoreo(ser):
+    write_ESP32(ser, b'X0')
 
 def enviar_trayectoria(ser): # WIP
-    f = open('test_trayectorias.txt', 'r')
+    f = open('temp/archivo_trayectorias.txt', 'r')
     lineas = f.readlines()
     cont = 0
+    done = False
+    ready = True
+    busy = False
+    lastTime_ready = time.time()
     inicio = time.time()
     while True:
+        rx = read_ESP32(ser)
+        rx = str(rx)
+        rx = rx[:-1]
+        if(len(rx)>0):
+            if(rx[0] == "r"):
+                ready = True
+                lastTime_ready = time.time()
+                # ser.flush()
+        if(time.time()-lastTime_ready > 0.1):
+            done = False
         tiempo, comando = lineas[cont].split(' ', 1)
         tiempo = float(tiempo)
         comando = comando.strip().encode('ascii')
         if(time.time()-inicio >= tiempo):
-            write_ESP32(ser, comando)
-            print(read_ESP32(ser))
-            cont += 1
-        if(cont > len(lineas)-1):
+            if(done == False):
+                write_ESP32(ser, comando)
+                print(comando.decode())
+                done = True
+                ready = False
+            elif(ready == True):
+                cont += 1
+                done = False
+        if(cont > len(lineas)-2):
             break
+    print(time.time() - inicio)

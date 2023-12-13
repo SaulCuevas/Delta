@@ -91,7 +91,6 @@ def get_matched_coordinates(temp_img, map_img):
     # plt.imshow(img3, 'gray'), plt.show()
 
     # result image path
-    print(os.path.join(os.getcwd(), 'temp/mask.png'))
     cv2.imwrite(os.path.join(os.getcwd(), 'temp/mask.png'), map_img)
     cv2.imwrite(os.path.join(os.getcwd(), 'temp/output.png'), img3)
 
@@ -109,9 +108,6 @@ def inicioSVA(path : str, map_path : str, _top_bottom : bool):
         interprete_gerber.genImage(path, top=True)
     else:
         interprete_gerber.genImage(path, top=False)
-
-    im1 = cv2.imread('temp/board-top.png')
-    im2 = cv2.imread('temp/board-bottom.png')
 
     # read images
     temp_img_gray = cv2.imread('temp/board-mask.png', 0)
@@ -158,6 +154,7 @@ def inicioSVA(path : str, map_path : str, _top_bottom : bool):
         x.angulo += grados_rot
         if(x.angulo) < 0.0: x.angulo += 360.0
         if(x.angulo) > 360.0: x.angulo -= 360.0
+        print(x.paquete)
 
     herr_soldadura = Trayectorias.cambio_herramienta(dispensador)
     puntos_soldadura = Trayectorias.soldaduraclass_to_puntos(soldadura_lista, 400) 

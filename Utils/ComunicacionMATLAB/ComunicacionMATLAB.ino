@@ -77,12 +77,12 @@ void loop(){
     Pos_real_1 = Pos_real;
     Pos_real = Pos + offset*MAX_POS;
 
-    w = (Pos_real-Pos_real_1)*1000.0/(millis()-lastTime); // Velocidad en rads/s
-    if(abs(w)>8) w=0;
+    // w = (Pos_real-Pos_real_1)*1000.0/(millis()-lastTime); // Velocidad en rads/s
+    // if(abs(w)>8) w=0;
     
     // float wPercentage = mapFloat(w,-MAX_VEL_MOTOR,MAX_VEL_MOTOR,-100,100);
     
-    PosUnion.number = w;
+    PosUnion.number = Pos_real;
     Serial.write('V');
     for(int i=0; i<4; i++){
       Serial.write(PosUnion.bytes[i]);
