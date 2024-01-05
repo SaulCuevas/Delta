@@ -7,9 +7,11 @@ import numpy as np
 from Control import Trayectorias
 import time
 
+from matplotlib import pyplot as plt
+
 x = loadmat('tests/trayectoria_upiita.mat')
 upiita = np.array(x['upiita'])
-altura = 400.0
+altura = 380.0
 
 trayectoria = Trayectorias.trayectoria_xy_to_puntos(upiita, altura)
 

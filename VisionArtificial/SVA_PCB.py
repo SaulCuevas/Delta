@@ -144,22 +144,37 @@ def inicioSVA(path : str, map_path : str, _top_bottom : bool):
         x.y = nuevo_y + offset_y
 
     componentes_lista = interprete_gerber.obtener_pnp(path, _top_bottom)
+
+    rot_real = np.zeros(len(componentes_lista)) # INSERTAR SVA2
+    offsets_reales = np.ones([len(componentes_lista), 2])*100.0 # INSERTAR SVA2
+    for x in range(offsets_reales.shape[0]):
+        offsets_reales[x][0] = 100.0 + x*10
+
     if(not(_top_bottom)): 
         interprete_gerber.mirror_bottom(path, componentes_lista)
-    for x in componentes_lista:
-        nuevo_x = x.x*math.cos(math.radians(grados_rot)) - x.y*math.sin(math.radians(grados_rot))
-        nuevo_y = x.x*math.sin(math.radians(grados_rot)) + x.y*math.cos(math.radians(grados_rot))
-        x.x = nuevo_x + offset_x
-        x.y = nuevo_y + offset_y
-        x.angulo += grados_rot
-        if(x.angulo) < 0.0: x.angulo += 360.0
-        if(x.angulo) > 360.0: x.angulo -= 360.0
-        print(x.paquete)
 
+    for x in range(len(componentes_lista)):
+        nuevo_x = componentes_lista[x].x*math.cos(math.radians(grados_rot)) - componentes_lista[x].y*math.sin(math.radians(grados_rot))
+        nuevo_y = componentes_lista[x].x*math.sin(math.radians(grados_rot)) + componentes_lista[x].y*math.cos(math.radians(grados_rot))
+        componentes_lista[x].x = nuevo_x + offset_x
+        componentes_lista[x].y = nuevo_y + offset_y
+        componentes_lista[x].angulo += grados_rot + rot_real[x]
+        if(componentes_lista[x].angulo) < 0.0: componentes_lista[x].angulo += 360.0
+        if(componentes_lista[x].angulo) > 360.0: componentes_lista[x].angulo -= 360.0
+
+    smd_lista = []
+    IC_lista = []
+    for x in range(len(componentes_lista)):
+        if componentes_lista[x].paquete != None and ("res" in componentes_lista[x].paquete or "RES" in componentes_lista[x].paquete or "cap" in componentes_lista[x].paquete or "CAP" in componentes_lista[x].paquete or "led" in componentes_lista[x].paquete or "LED" in componentes_lista[x].paquete):
+            smd_lista.append(componentes_lista[x])
+        else:
+            IC_lista.append(componentes_lista[x])
+    
     herr_soldadura = Trayectorias.cambio_herramienta(dispensador)
     puntos_soldadura = Trayectorias.soldaduraclass_to_puntos(soldadura_lista, 400) 
     herr_pnp = Trayectorias.cambio_herramienta(pnp)
-    puntos_pnp = Trayectorias.componentesclass_to_puntos(componentes_lista, 400, 420)
+    # puntos_pnp = Trayectorias.componentesclass_to_puntos(componentes_lista, 400, 420)
+    puntos_pnp = Trayectorias.componentesclass_to_puntos2(smd_lista, IC_lista, 400, 420, offsets_reales)
     herr_cam = Trayectorias.cambio_herramienta(camara)
 
     puntos = np.append(herr_soldadura, puntos_soldadura, axis=0)

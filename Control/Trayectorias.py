@@ -2,6 +2,8 @@ import numpy as np
 from Control.DeltaEcuaciones import *
 import matplotlib.pyplot as plt
 step = 0.010
+interps = 5
+interp_cada_x_mm = 50.0
 
 # operaciones 
 movimiento = 1
@@ -15,6 +17,10 @@ inventario = 6
 camara = 0
 dispensador = 1
 pnp = 2
+
+valPWM_soldadura = 50
+max_comp_por_cuadrante = 72
+max_IC_por_cuadrante = 2
 
 home_pos = np.array([0.0, 0.0, 200.0])
 
@@ -37,6 +43,86 @@ def getOffsetPnP():
 
 def trapezoide(tf : float, q0 : float, qf : float):
     t = np.arange(0, tf+step, step)
+    qd = np.zeros(t.size)
+    dqd = np.zeros(t.size)
+    d2qd = np.zeros(t.size)
+    
+    v=1.5*(qf-q0)/tf
+
+    if(v==0):
+        qd = np.full(t.size, q0)
+        return t, qd, dqd, d2qd
+
+    a0=q0
+    a1=0
+    tb=(q0-qf+v*tf)/v
+    a2=v/(2*tb)
+    b0=(q0+qf-v*tf)/2
+    b1=v
+    c2=-a2
+    c1=v*tf/tb
+    c0=qf-0.5*v*(pow(tf,2))/tb
+
+    for i in range(t.size):
+        if(t[i]>=0 and t[i]<tb):
+            qd[i] = a0 + a1*t[i] + a2*pow(t[i],2)
+            dqd[i] = a1 + 2*a2*t[i]
+            d2qd[i] = 2*a2
+        elif(t[i]>=tb and t[i]<=(tf-tb)):
+            qd[i] = b0 + b1*t[i]
+            dqd[i] = b1
+            d2qd[i] = 0
+        elif(t[i]>(tf-tb) and t[i]<=tf):
+            qd[i] = c0 + c1*t[i] + c2*pow(t[i],2)
+            dqd[i] = c1 + 2*c2*t[i]
+            d2qd[i] = 2*c2
+        else:
+            qd[i] = qf
+            dqd[i] = dqd[i-1]
+            d2qd[i] = d2qd[i-1]
+
+    return t, qd, dqd, d2qd
+
+def lineal_no_t(tf : float, q0 : float, qf : float, interps_reales : int):
+    t1 = 0.0
+    if tf < step:
+        tf = t1 + step
+        t = np.array([t1, tf])
+        qd = np.array([q0, qf])
+        dqd = np.array([0, (qf-q0)/(tf-t1)])
+        d2qd = np.array([0, (dqd[1]-dqd[0])/(tf-t1)])
+        return t, qd, dqd, d2qd
+    
+    if tf < step*interps_reales:
+        tf = step*interps_reales
+
+    t = np.linspace(start=t1, stop=tf, num=interps_reales)
+    qd = np.zeros(t.size)
+    dqd = np.zeros(t.size)
+    d2qd = np.zeros(t.size)
+
+    for i in range(t.size):
+        qd[i] = (i)*(qf-q0)/(interps_reales-1) + q0
+        if(i>0):
+            dqd[i] = (qd[i]-qd[i-1]) / (t[i]-t[i-1])
+            d2qd[i] = (dqd[i]-dqd[i-1]) / (t[i]-t[i-1])
+
+    return t, qd, dqd, d2qd
+
+def trapezoide_no_t(tf : float, q0 : float, qf : float, interps_reales : int):
+    t1 = 0.0
+    if tf < step:
+        tf = t1 + step
+        t = np.array([t1, tf])
+        qd = np.array([q0, qf])
+        dqd = np.array([0, (qf-q0)/(tf-t1)])
+        d2qd = np.array([0, (dqd[1]-dqd[0])/(tf-t1)])
+        return t, qd, dqd, d2qd
+    
+    if tf < step*interps_reales:
+        tf = step*interps_reales
+
+    t = np.linspace(start=t1, stop=tf, num=interps_reales)
     qd = np.zeros(t.size)
     dqd = np.zeros(t.size)
     d2qd = np.zeros(t.size)
@@ -107,21 +193,21 @@ def bezier(t2 : float, q1 : float, q2 : float):
     
     return t, qd, dqd, d2qd
 
-def bezier_no_t(t2 : float, q1 : float, q2 : float):
-    interps = 2
+def bezier_no_t(t2 : float, q1 : float, q2 : float, interps_reales : int):
     t1 = 0.0
     if t2 < step:
+        t2 = t1 + step
         t = np.array([t1, t2])
         qd = np.array([q1, q2])
         dqd = np.array([0, (q2-q1)/(t2-t1)])
         d2qd = np.array([0, (dqd[1]-dqd[0])/(t2-t1)])
         return t, qd, dqd, d2qd
     
-    if t2 < step*interps:
-        t2 = step*interps
+    if t2 < step*interps_reales:
+        t2 = step*interps_reales
 
     gamma_1 = 126; gamma_2 = 420; gamma_3 = 540; gamma_4 = 315; gamma_5 = 70
-    t = np.linspace(start=t1, stop=t2, num=interps)
+    t = np.linspace(start=t1, stop=t2, num=interps_reales)
     qd = np.zeros(t.size)
     dqd = np.zeros(t.size)
     d2qd = np.zeros(t.size)
@@ -306,7 +392,10 @@ def calc_trayectorias_ps_no_t(func, operaciones : np.single, Ps : np.single, vel
             if (operaciones[i] == movimiento) & (operaciones[i+1] == movimiento): # se calcula el tiempo de interpolacion 
                 tiempos[i] = math.sqrt( (Ps[i+1,0]-Ps[i,0])**2 + (Ps[i+1,1]-Ps[i,1])**2 + (Ps[i+1,2]-Ps[i,2])**2 )/(vel_deseada[i]/1.5)
             elif (operaciones[i] != movimiento) & (operaciones[i+1] == movimiento) & (i>0): # se calcula el tiempo de interpolacion 
-                tiempos[i-1] = math.sqrt( (Ps[i+1,0]-Ps[i-1,0])**2 + (Ps[i+1,1]-Ps[i-1,1])**2 + (Ps[i+1,2]-Ps[i-1,2])**2 )/(vel_deseada[i-1]/1.5) 
+                if operaciones[i-1] == movimiento:
+                    tiempos[i-1] = math.sqrt( (Ps[i+1,0]-Ps[i-1,0])**2 + (Ps[i+1,1]-Ps[i-1,1])**2 + (Ps[i+1,2]-Ps[i-1,2])**2 )/(vel_deseada[i-1]/1.5) 
+                else:
+                    tiempos[i] = Ps[i,0]
             elif operaciones[i] != movimiento: # no se usa en interpolacion
                 tiempos[i] = Ps[i,0]  
         t0 = np.zeros(1) # se inicializan los arreglos tipo numpy
@@ -374,13 +463,13 @@ def calc_trayectorias_ps_no_t(func, operaciones : np.single, Ps : np.single, vel
                 t0 = np.append(t0,0.5+t0[-1]) # le agrego al vector de tiempo 500ms
                 t1 = np.append(t1,0.5+t1[-1])
                 t2 = np.append(t2,0.5+t2[-1])
-                pd0 = np.append(pd0,pd0[-1])    # manteniendo la posicion HOME X
+                pd0 = np.append(pd0,pd0[-1])    # manteniendo la misma posicion
                 dpd0 = np.append(dpd0,0.0)       # vel = 0.0
                 d2pd0 = np.append(d2pd0,0.0)      # acel = 0.0
-                pd1 = np.append(pd1,pd1[-1])    # manteniendo la posicion HOME Y
+                pd1 = np.append(pd1,pd1[-1])    # manteniendo la misma posicion
                 dpd1 = np.append(dpd1,0.0)       # vel = 0.0
                 d2pd1 = np.append(d2pd1,0.0)      # acel = 0.0
-                pd2 = np.append(pd2,pd2[-1])    # manteniendo la posicion HOME Z
+                pd2 = np.append(pd2,pd2[-1])    # manteniendo la misma posicion
                 dpd2 = np.append(dpd2,0.0)       # vel = 0.0
                 d2pd2 = np.append(d2pd2,0.0)      # acel = 0.0
 
@@ -406,19 +495,20 @@ def calc_trayectorias_ps_no_t(func, operaciones : np.single, Ps : np.single, vel
                 t0 = np.append(t0,5.0+t0[-1]) # le agrego al vector de tiempo 5s
                 t1 = np.append(t1,5.0+t1[-1])
                 t2 = np.append(t2,5.0+t2[-1])
-                pd0 = np.append(pd0,home_pos[0])    # manteniendo la posicion HOME X
+                pd0 = np.append(pd0,pd0[-1])    # manteniendo la misma posicion
                 dpd0 = np.append(dpd0,0.0)       # vel = 0.0
                 d2pd0 = np.append(d2pd0,0.0)      # acel = 0.0
-                pd1 = np.append(pd1,home_pos[1])    # manteniendo la posicion HOME Y
+                pd1 = np.append(pd1,pd1[-1])    # manteniendo la misma posicion
                 dpd1 = np.append(dpd1,0.0)       # vel = 0.0
                 d2pd1 = np.append(d2pd1,0.0)      # acel = 0.0
-                pd2 = np.append(pd2,home_pos[2])    # manteniendo la posicion HOME Z
+                pd2 = np.append(pd2,pd2[-1])    # manteniendo la misma posicion
                 dpd2 = np.append(dpd2,0.0)       # vel = 0.0
                 d2pd2 = np.append(d2pd2,0.0)      # acel = 0.0
             
             if (operaciones[y] == movimiento) & (operaciones[y+1] == movimiento):
+                interp_real = round(( math.sqrt( (Ps[y+1,0] - Ps[y,0])**2 + (Ps[y+1,1] - Ps[y,1])**2 + (Ps[y+1,2] - Ps[y,2])**2 ) )/interp_cada_x_mm) + 2
                 # Para interpolar entre dos puntos de trayectoria contiguos
-                t, pd, dpd, d2pd = func(tiempos[y], Ps[y,0], Ps[y+1,0]) # se calcula la interpolacion entre puntos en X
+                t, pd, dpd, d2pd = func(tiempos[y], Ps[y,0], Ps[y+1,0], interp_real) # se calcula la interpolacion entre puntos en X
                 t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:] # dado que la interpolacion pd inicia en t[0] = 0.0, se elimina ese punto para unirlo a la interpolacion anterior
                 t0 = np.append(t0,np.add(t,t0[-1])) # se agrega t al vector de tiempos, sumandole el ultimo tiempo
                 pd0 = np.append(pd0,pd) # se agrega pd al vector de pds en X
@@ -426,7 +516,7 @@ def calc_trayectorias_ps_no_t(func, operaciones : np.single, Ps : np.single, vel
                 d2pd0 = np.append(d2pd0,d2pd) # se agrega d2pd al vector de d2pds en X
 
                 # Se repite para Y
-                t, pd, dpd, d2pd = func(tiempos[y], Ps[y,1], Ps[y+1,1])
+                t, pd, dpd, d2pd = func(tiempos[y], Ps[y,1], Ps[y+1,1], interp_real)
                 t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
                 t1 = np.append(t1,np.add(t,t1[-1]))
                 pd1 = np.append(pd1,pd)
@@ -434,7 +524,7 @@ def calc_trayectorias_ps_no_t(func, operaciones : np.single, Ps : np.single, vel
                 d2pd1 = np.append(d2pd1,d2pd)
 
                 # Se repite para Z
-                t, pd, dpd, d2pd = func(tiempos[y], Ps[y,2], Ps[y+1,2])
+                t, pd, dpd, d2pd = func(tiempos[y], Ps[y,2], Ps[y+1,2], interp_real)
                 t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
                 t2 = np.append(t2,np.add(t,t2[-1]))
                 pd2 = np.append(pd2,pd)
@@ -442,22 +532,23 @@ def calc_trayectorias_ps_no_t(func, operaciones : np.single, Ps : np.single, vel
                 d2pd2 = np.append(d2pd2,d2pd)
 
             elif (operaciones[y] != movimiento) & (operaciones[y+1] == movimiento) & (y>0):
+                interp_real = round(( math.sqrt( (Ps[y+1,0] - Ps[y-1,0])**2 + (Ps[y+1,1] - Ps[y-1,1])**2 + (Ps[y+1,2] - Ps[y-1,2])**2 ) )/interp_cada_x_mm) + 2
                 # Para interpolar entre dos puntos de trayectoria con una operacion intermedia
-                t, pd, dpd, d2pd = func(tiempos[y-1], Ps[y-1,0], Ps[y+1,0]) # <- es diferente 
+                t, pd, dpd, d2pd = func(tiempos[y-1], Ps[y-1,0], Ps[y+1,0], interp_real) # <- es diferente 
                 t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
                 t0 = np.append(t0,np.add(t,t0[-1]))
                 pd0 = np.append(pd0,pd)
                 dpd0 = np.append(dpd0,dpd)
                 d2pd0 = np.append(d2pd0,d2pd)
 
-                t, pd, dpd, d2pd = func(tiempos[y-1], Ps[y-1,1], Ps[y+1,1]) #<-
+                t, pd, dpd, d2pd = func(tiempos[y-1], Ps[y-1,1], Ps[y+1,1], interp_real) #<-
                 t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
                 t1 = np.append(t1,np.add(t,t1[-1]))
                 pd1 = np.append(pd1,pd)
                 dpd1 = np.append(dpd1,dpd)
                 d2pd1 = np.append(d2pd1,d2pd)
 
-                t, pd, dpd, d2pd = func(tiempos[y-1], Ps[y-1,2], Ps[y+1,2]) #<-
+                t, pd, dpd, d2pd = func(tiempos[y-1], Ps[y-1,2], Ps[y+1,2], interp_real) #<-
                 t = t[1:]; pd = pd[1:]; dpd = dpd[1:]; d2pd = d2pd[1:]
                 t2 = np.append(t2,np.add(t,t2[-1]))
                 pd2 = np.append(pd2,pd)
@@ -517,26 +608,26 @@ def calc_trayectorias_ps_no_t(func, operaciones : np.single, Ps : np.single, vel
         # Ej: 0.0000 M123 0.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0.00000 0.00000
         # Ej: 0.0000 S 0.00000
         for x in range(ts.shape[1]):
-            if(cont_sold>0):
+            if ( index_soldaduras.shape[0]>0 ):
                 if(x==index_soldaduras[cont_sold]):
+                    f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'S ' + '%i' % valPWM_soldadura + ' ' + "%i" % int(pulsos_soldaduras[cont_sold]*1000000) + '\n')
                     if(cont_sold<len(index_soldaduras)-1): cont_sold += 1
-                    f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'S ' + "%.5f" % pulsos_soldaduras[cont_sold] + '\n')
-            if(cont_valv_on>0):
+            if ( index_valvula_on.shape[0]>0 ):
                 if(x==index_valvula_on[cont_valv_on]):
-                    if(cont_valv_on<len(index_valvula_on)-1): cont_valv_on += 1
                     f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'V1\n')
-            if(cont_valv_off>0):
+                    if(cont_valv_on<len(index_valvula_on)-1): cont_valv_on += 1
+            if ( index_valvula_off.shape[0]>0 ):
                 if(x==index_valvula_off[cont_valv_off]):
-                    if(cont_valv_off<len(index_valvula_off)-1):cont_valv_off += 1
                     f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'V0\n')
-            if(cont_herr>0):
+                    if(cont_valv_off<len(index_valvula_off)-1):cont_valv_off += 1
+            if ( index_herramienta.shape[0]>0 ):
                 if(x==index_herramienta[cont_herr]):
-                    if(cont_herr<len(index_herramienta)-1):cont_herr += 1
                     f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'T' + "%.0f" % herramientas[cont_herr] + '\n')
-            if(cont_inv>0):
+                    if(cont_herr<len(index_herramienta)-1):cont_herr += 1
+            if ( index_inventario.shape[0]>0 ):
                 if(x==index_inventario[cont_inv]):
+                    f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'M4' + ' ' + "%.0f" % inventario_pos[cont_inv] + '\n')
                     if(cont_inv<len(index_inventario)-1):cont_inv += 1
-                    f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'M4' + "%.0f" % inventario_pos[cont_inv] + '\n')
             else:
                 f.writelines("%.4f" % ts[0][x] + ' ' + 
                              'M123 ' + "%.5f" % qds[0][x] + ' ' + "%.5f" % dqds[0][x] + ' ' + "%.5f" % d2qds[0][x]
@@ -642,7 +733,7 @@ def plot_trayectorias_IK(ts, qds, dqds, d2qds, pds, dpds, d2pds):
     fig = plt.figure()
     ax = plt.axes(projection='3d')
 
-    ax.plot3D(Ps_FK[:,0], Ps_FK[:,1], Ps_FK[:,2], 'gray')
+    ax.plot3D(Ps_FK[:,0], Ps_FK[:,1], Ps_FK[:,2], 'gray', marker='.')
 
     ax.set_xlim(-250, 250); ax.set_ylim(-250, 250); ax.set_zlim(167.1977, 522.4509); ax.invert_zaxis()
     ax.set_xlabel('x'); ax.set_ylabel('y'); ax.set_zlabel('z'); ax.set_title('Trayectoria generada (interp en ps)')
@@ -659,6 +750,41 @@ def soldaduraclass_to_puntos(soldadura_lista, altura_pcb):
                             np.array([movimiento, soldadura_lista[x].x-offset_dispensador[0], soldadura_lista[x].y-offset_dispensador[1], altura_pcb-10-offset_dispensador[2], 25])] # # pos de pcb (x,y) + 10 mm de altura
     puntos[-1,4] = 500.0
     puntos[-1,:] = np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500])   # HOME
+    return puntos
+
+def componentesclass_to_puntos2(pnp_lista_sin_IC, IC_lista, altura_pcb, altura_pnp, offsets_lista):
+    pnp_lista = np.append(pnp_lista_sin_IC, IC_lista, axis=0)
+    i = 8
+    puntos = np.zeros((len(pnp_lista)*i+1,5), dtype=float)
+    puntos[0,:] = np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500]) # HOME
+    for x in range(len(pnp_lista)):
+        offset_x = offsets_lista[x,0]
+        offset_y = offsets_lista[x,1]
+        puntos[x*i+1:x*i+i+1,:] = [np.array([movimiento, offset_x-offset_pnp[0], offset_y-offset_pnp[1], altura_pcb-10-offset_pnp[2], 25]), # pos de componente(x,y) + 10 mm de altura
+                            np.array([valvula_on, 0, 0, 0, 0]), # enciende la valvula
+                            np.array([movimiento, offset_x-offset_pnp[0], offset_y-offset_pnp[1], altura_pnp-offset_pnp[2], 25]), # baja a componente(x,y)
+                            np.array([movimiento, offset_x-offset_pnp[0], offset_y-offset_pnp[1], altura_pcb-10-offset_pnp[2], 25]), # sube
+                            np.array([movimiento, pnp_lista[x].x-offset_pnp[0], pnp_lista[x].y-offset_pnp[1], altura_pcb-10-offset_pnp[2], 25]), # pos de componente en pcb
+                            np.array([movimiento, pnp_lista[x].x-offset_pnp[0], pnp_lista[x].y-offset_pnp[1], altura_pcb-offset_pnp[2], 25]), # baja
+                            np.array([valvula_off, 0, 0, 0, 0]), # apaga la valvula
+                            np.array([movimiento, pnp_lista[x].x-offset_pnp[0], pnp_lista[x].y-offset_pnp[1], altura_pcb-10-offset_pnp[2], 50])] # sube
+    puntos[-1,4] = 500.0
+    puntos = np.r_[puntos, np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500]).reshape(1,5)]
+    veces = math.floor( len(pnp_lista_sin_IC) / max_comp_por_cuadrante ) # veces que va a girar el inventario
+    veces_IC = math.floor( len(IC_lista) / max_IC_por_cuadrante ) # veces que va a girar el inventario
+    giro = np.array([inventario, 0.0, 0, 0, 0])
+    puntos = np.insert(puntos, 1, giro, axis=0) 
+    for x in range(veces):
+        giro = np.array([inventario, 90.0*(x+1), 0, 0, 0])
+        puntos = np.insert(puntos, max_comp_por_cuadrante*(x+1)*i + x + 1 + 1, giro, axis=0) 
+    giro = np.array([inventario, 0.0, 0, 0, 0])
+    puntos = np.insert(puntos, len(pnp_lista_sin_IC)*i + veces + 1 + 1, giro, axis=0)
+    for x in range(veces_IC):
+        giro = np.array([inventario, 90.0*(x+1), 0, 0, 0])
+        puntos = np.insert(puntos, len(pnp_lista_sin_IC)*i + veces + 1 + max_IC_por_cuadrante*(x+1)*i + x + 1 + 1, giro, axis=0)
+    if (veces_IC > 0) or (veces > 0):
+        giro = np.array([inventario, 0.0, 0, 0, 0]).reshape(1,5)
+        puntos = np.r_[puntos, giro]
     return puntos
 
 def componentesclass_to_puntos(pnp_lista, altura_pcb, altura_pnp):
@@ -699,12 +825,12 @@ def cambio_herramienta(herr : int):
 def trayectoria_xy_to_puntos(trayectoria_xy, altura):
     home_pos_vel = np.array([home_pos[0], home_pos[1], home_pos[2], 200.0])
     alturas = np.ones(trayectoria_xy.shape[0])*altura
-    vels = np.ones(trayectoria_xy.shape[0])*500
+    vels = np.ones(trayectoria_xy.shape[0])*50
     trayectoria_xy_completo = np.c_[trayectoria_xy, alturas, vels]
     trayectoria_xy_completo = np.insert(home_pos_vel.reshape(1,4), 1, trayectoria_xy_completo, axis=0)
     trayectoria_xy_completo = np.insert(trayectoria_xy_completo, trayectoria_xy_completo.shape[0], home_pos_vel.reshape(1,4), axis=0)
     trayectoria_xy_completo = np.c_[np.ones(trayectoria_xy_completo.shape[0]), trayectoria_xy_completo]
     trayectoria_xy_completo[-2][4] = 20.0
-    trayectoria_xy_completo = np.insert(trayectoria_xy_completo, 1, np.array([trayectoria_xy_completo[1][0], trayectoria_xy_completo[1][1], trayectoria_xy_completo[1][2], trayectoria_xy_completo[1][3]-10, 20.0]).reshape(1,5), axis=0)
+    trayectoria_xy_completo = np.insert(trayectoria_xy_completo, 1, np.array([trayectoria_xy_completo[1][0], trayectoria_xy_completo[1][1], trayectoria_xy_completo[1][2], trayectoria_xy_completo[1][3]-10, 5.0]).reshape(1,5), axis=0)
     trayectoria_xy_completo = np.insert(trayectoria_xy_completo, -1, np.array([trayectoria_xy_completo[-2][0], trayectoria_xy_completo[-2][1], trayectoria_xy_completo[-2][2], trayectoria_xy_completo[-2][3]-10, 200.0]).reshape(1,5), axis=0)
     return trayectoria_xy_completo

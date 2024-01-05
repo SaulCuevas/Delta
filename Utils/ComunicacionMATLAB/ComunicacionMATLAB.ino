@@ -13,8 +13,8 @@ const int MT6701_ADDRESS = 0x06;
 const int PCA9548A_ADDRESS = 0x70;
 
 // Pines del microcontrolador
-const int pinIN1 = 32;
-const int pinIN2 = 33;
+const int pinIN1 = 25;
+const int pinIN2 = 26;
 
 // Configuracion PWM ESP32
 const int PWMfreq = 1000; // 1 kHz
@@ -57,7 +57,7 @@ void setup(){
   ledcAttachPin(pinIN1, PWMChannelIN1_0);
   ledcAttachPin(pinIN2, PWMChannelIN2_0);
   
-  PCA9548A_cambio_direccion(0, 1);
+  PCA9548A_cambio_direccion(1, 1);
   lastTime = millis();
 }
 

@@ -116,6 +116,9 @@ def activar_monitoreo(ser):
 def desactivar_monitoreo(ser):
     write_ESP32(ser, b'X0')
 
+def cambiarK(ser, K : int, motor : int, valor : float):
+    write_ESP32(ser, b'K' + b'%i' % K + b' ' + b'%i' % motor + b' ' + b'%f' % valor)
+
 def enviar_trayectoria(ser): # WIP
     f = open('temp/archivo_trayectorias.txt', 'r')
     lineas = f.readlines()
@@ -130,12 +133,14 @@ def enviar_trayectoria(ser): # WIP
         rx = str(rx)
         rx = rx[:-1]
         if(len(rx)>0):
+            print(rx)
             if(rx[0] == "r"):
                 ready = True
                 lastTime_ready = time.time()
+                print(time.time() - inicio)
                 # ser.flush()
-        if(time.time()-lastTime_ready > 0.1):
-            done = False
+        # if(time.time()-lastTime_ready > 5):
+        #     done = False
         tiempo, comando = lineas[cont].split(' ', 1)
         tiempo = float(tiempo)
         comando = comando.strip().encode('ascii')

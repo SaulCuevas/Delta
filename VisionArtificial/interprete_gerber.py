@@ -61,7 +61,6 @@ def obtener_pnp(path : str, _top_bottom : bool):
                 lista_componentes.append(componentes_class(row[0], row[3], row[4], row[5], row[1], row[2], it)) # parse para archivos kicad
             it += 1
 
-    # lista_componentes.pop(0)
     return lista_componentes
 
 def obtener_soldadura(path : str, _top_bottom : bool):
