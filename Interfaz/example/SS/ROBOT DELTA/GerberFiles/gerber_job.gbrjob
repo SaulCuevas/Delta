@@ -1,0 +1,24 @@
+{
+    "Header": {
+        "Comment": "All values are metric (mm)",
+        "CreationDate": "2023-11-06T22:50:02Z",
+        "GenerationSoftware": {
+            "Application": "Fusion 360 Electronics",
+            "Vendor": "Autodesk",
+            "Version": "9.7.0"
+        },
+        "Part": "Single"
+    },
+    "Overall": {
+        "BoardThickness": 1.57,
+        "LayerNumber": 2,
+        "Name": {
+            "ProjectId": "02_DAC v2"
+        },
+        "Owner": "Luis Fernando Morales Flores <lmoralesf1501@alumno.ipn.mx>",
+        "Size": {
+            "X": 26,
+            "Y": 28
+        }
+    }
+}
