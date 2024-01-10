@@ -24,7 +24,18 @@ from PyQt5.QtWidgets import (
     QWidget,
     QPushButton)
 
-import op.E1_COMENZAR as archivos
+import os
+import sys
+# Dirección de imagen
+# path = os.getcwd()
+path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.name == 'nt':
+    aux_path = os.path.join(path, 'Interfaz\menu\op')
+else:
+    aux_path = os.path.join(path, 'Interfaz/menu/op')
+sys.path.insert(0, aux_path)
+
+import E1_COMENZAR as archivos
 
 
 # CLASE COMENZAR - WIDGET
@@ -117,7 +128,7 @@ class COMENZAR(QWidget):
         lbl_comenzar = QLabel("COMENZAR")   # Generar Label Ventana COMENZAR
         lbl_comenzar.setAlignment(Qt.AlignCenter)   # Alinear texto en el centro
         lbl_comenzar.setStyleSheet(st_label)    # Fijar estilo de widget
-        w = lbl_comenzar.sizeHint().width() + 10    # Guardar valor de ancho para widget
+        w = lbl_comenzar.sizeHint().width() * 1.1    # Guardar valor de ancho para widget
         h = lbl_comenzar.sizeHint().height()    # Guardar valor de alto para widget
         lbl_comenzar.setFixedSize(w, h) # Ajustar valores de ancho (w) y alto (h) para widget
         main_layout.addWidget(lbl_comenzar, alignment = Qt.AlignCenter) # Agregar widget a LAYOUT PRINCIPAL
@@ -125,24 +136,24 @@ class COMENZAR(QWidget):
         # Button 01: NUEVO USUARIO
         self.btn_new = QPushButton("Nuevo Usuario") # Generar PushBUtton NUEVO USUARIO
         self.btn_new.setStyleSheet(st_alt)   # Fijar estilo de widget
-        w = self.btn_new.sizeHint().width() # Guardar valor de ancho para widget
-        h = self.btn_new.sizeHint().height()    # Guardar valor de alto para widget
-        self.btn_new.setFixedSize(w + 10, h + 10)   # Ajustar valores de ancho (w) y alto (h) para widget
+        w = self.btn_new.sizeHint().width() * 1.1 # Guardar valor de ancho para widget
+        h = self.btn_new.sizeHint().height() * 1.1    # Guardar valor de alto para widget
+        self.btn_new.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         main_layout.addWidget(self.btn_new, alignment = Qt.AlignCenter) # Agregar widget a LAYOUT PRINCIPAL
         
         # Button 02: USUARIO EXISTENTE
         self.btn_old = QPushButton("Usuario Existente") # Generar PushBUtton USUARIO EXISTENTE
         self.btn_old.setStyleSheet(st_alt)   # Fijar estilo de widget
-        w = self.btn_old.sizeHint().width() # Guardar valor de ancho para widget
-        h = self.btn_old.sizeHint().height()    # Guardar valor de alto para widget
-        self.btn_old.setFixedSize(w + 10, h + 10)   # Ajustar valores de ancho (w) y alto (h) para widget
+        w = self.btn_old.sizeHint().width() * 1.1 # Guardar valor de ancho para widget
+        h = self.btn_old.sizeHint().height() * 1.1    # Guardar valor de alto para widget
+        self.btn_old.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         main_layout.addWidget(self.btn_old, alignment = Qt.AlignCenter) # Agregar widget a LAYOUT PRINCIPAL
         
         # Button 03: Volver a ventana de MENU
         self.btn_start = QPushButton("Volver")  # Generar PushBUtton VOLVER A MENU  
         self.btn_start.setStyleSheet(st_btn)    # Fijar estilo de widget
         w = self.btn_start.sizeHint().width() * 1.3 # Guardar valor de ancho para widget
-        h = self.btn_start.sizeHint().height() + 10  # Guardar valor de alto para widget
+        h = self.btn_start.sizeHint().height() * 1.1  # Guardar valor de alto para widget
         self.btn_start.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         main_layout.addWidget(self.btn_start, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT PRINCIPAL
         

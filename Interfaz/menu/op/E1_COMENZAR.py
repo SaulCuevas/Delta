@@ -20,8 +20,18 @@ Descripción:
 @author: Spect
 """
 
+import os
 import sys
-#sys.path.append(r'C:\Users\Spect\Downloads\Delta-SVA\VisionArtificial\PCB')
+
+# Dirección de imagen
+# path = os.getcwd()
+path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.name == 'nt':
+    aux_path = os.path.join(path, 'Interfaz\code_aux')
+else:
+    aux_path = os.path.join(path, 'Interfaz/code_aux')
+sys.path.insert(0, aux_path)
+
 import interprete_gerber as gbr
 import special_table as tbl
 
@@ -50,7 +60,7 @@ from PyQt5.QtWidgets import (
     QLineEdit,
     QCheckBox,
     QDoubleSpinBox)
-import os
+
 import qtawesome as qta
 import time
 
@@ -90,7 +100,7 @@ class ARCHIVOS(QWidget):
         lbl_comenzar = QLabel("ARCHIVOS")
         lbl_comenzar.setAlignment(Qt.AlignCenter)
         lbl_comenzar.setStyleSheet("border: 1px solid black; background-color: lightgreen")
-        w = lbl_comenzar.sizeHint().width() + 10
+        w = lbl_comenzar.sizeHint().width() * 1.1
         h = lbl_comenzar.sizeHint().height()
         lbl_comenzar.setFixedSize(w, h)
         main_layout.addWidget(lbl_comenzar, alignment = Qt.AlignCenter)
@@ -140,9 +150,9 @@ class ARCHIVOS(QWidget):
         style += "border-style: inset } "
         
         self.btn_file.setStyleSheet(style)
-        w = self.btn_file.sizeHint().width()
+        w = self.btn_file.sizeHint().width() * 1.1
         h = self.btn_file.sizeHint().height()
-        self.btn_file.setFixedSize(w + 10, h)
+        self.btn_file.setFixedSize(w, h)
         file_layout.addWidget(self.btn_file, alignment = Qt.AlignCenter)
         
         self.btn_file.clicked.connect(self.open_file)
@@ -181,9 +191,9 @@ class ARCHIVOS(QWidget):
         
         
         self.btn_act.setStyleSheet(style)
-        w = self.btn_act.sizeHint().width()
-        h = self.btn_act.sizeHint().height()
-        self.btn_act.setFixedSize(w + 25, h + 10)
+        w = self.btn_act.sizeHint().width() * 1.2
+        h = self.btn_act.sizeHint().height() * 1.1
+        self.btn_act.setFixedSize(w, h)
         self.btn_act.clicked.connect(self.actualizar)
         btns_layout.addStretch(0)
         btns_layout.addWidget(self.btn_act, alignment = Qt.AlignCenter)
@@ -191,9 +201,9 @@ class ARCHIVOS(QWidget):
         # BUTTON 3: CONTINUAR
         self.btn_continuar = QPushButton("Continuar")        
         self.btn_continuar.setStyleSheet(style)
-        w = self.btn_continuar.sizeHint().width()
-        h = self.btn_continuar.sizeHint().height()
-        self.btn_continuar.setFixedSize(w + 25, h + 10)
+        w = self.btn_continuar.sizeHint().width() * 1.2
+        h = self.btn_continuar.sizeHint().height() * 1.1
+        self.btn_continuar.setFixedSize(w, h)
         self.btn_continuar.clicked.connect(self.continuar)
         btns_layout.addStretch(0)
         btns_layout.addWidget(self.btn_continuar, alignment = Qt.AlignCenter)
@@ -288,8 +298,8 @@ class ARCHIVOS(QWidget):
         
         self.btn_start.setStyleSheet(style)
         self.btn_start.setFont(QFont("Georgia", 10, QFont.Bold))
-        w = self.btn_start.sizeHint().width() + 100
-        h = self.btn_start.sizeHint().height() + 5
+        w = self.btn_start.sizeHint().width() * 1.5
+        h = self.btn_start.sizeHint().height() * 1.05
         self.btn_start.setFixedSize(w, h)
         main_layout.addWidget(self.btn_start, alignment = Qt.AlignCenter)
         
@@ -305,7 +315,7 @@ class ARCHIVOS(QWidget):
         lbl_table = QLabel("COMPONENTES")
         lbl_table.setAlignment(Qt.AlignCenter)
         lbl_table.setStyleSheet("border: 1px solid black; background-color: lightgreen")
-        w = lbl_table.sizeHint().width() + 10
+        w = lbl_table.sizeHint().width() * 1.1
         h = lbl_table.sizeHint().height()
         lbl_table.setFixedSize(w, h)
         table_layout.addWidget(lbl_table, alignment = Qt.AlignCenter)
@@ -352,8 +362,8 @@ class ARCHIVOS(QWidget):
         
         self.btn_back.setStyleSheet(style)
         self.btn_back.setFont(QFont("Georgia", 10, QFont.Bold))
-        w = self.btn_back.sizeHint().width() + 100
-        h = self.btn_back.sizeHint().height() + 5
+        w = self.btn_back.sizeHint().width() * 1.5
+        h = self.btn_back.sizeHint().height() * 1.05
         self.btn_back.setFixedSize(w, h)
         self.btn_back.clicked.connect(self.back)
         btn_table_layout.addStretch(0)
@@ -364,8 +374,8 @@ class ARCHIVOS(QWidget):
         self.btn_cont = QPushButton("Continuar")
         self.btn_cont.setStyleSheet(style)
         self.btn_cont.setFont(QFont("Georgia", 10, QFont.Bold))
-        w = self.btn_cont.sizeHint().width() + 100
-        h = self.btn_cont.sizeHint().height() + 5
+        w = self.btn_cont.sizeHint().width() * 1.5
+        h = self.btn_cont.sizeHint().height() * 1.05
         self.btn_cont.setFixedSize(w, h)
         self.btn_cont.clicked.connect(self.cont)
         btn_table_layout.addWidget(self.btn_cont, alignment = Qt.AlignCenter)
@@ -382,7 +392,7 @@ class ARCHIVOS(QWidget):
         lbl_pcb = QLabel("PCB")
         lbl_pcb.setAlignment(Qt.AlignCenter)
         lbl_pcb.setStyleSheet("border: 1px solid black; background-color: lightgreen")
-        w = lbl_pcb.sizeHint().width() + 10
+        w = lbl_pcb.sizeHint().width() * 1.1
         h = lbl_pcb.sizeHint().height()
         lbl_pcb.setFixedSize(w, h)
         pcb_layout.addWidget(lbl_pcb, alignment = Qt.AlignCenter)
@@ -417,8 +427,8 @@ class ARCHIVOS(QWidget):
         
         self.btn_pcb_back.setStyleSheet(style)
         self.btn_pcb_back.setFont(QFont("Georgia", 10, QFont.Bold))
-        w = self.btn_pcb_back.sizeHint().width() + 100
-        h = self.btn_pcb_back.sizeHint().height() + 5
+        w = self.btn_pcb_back.sizeHint().width() * 1.5
+        h = self.btn_pcb_back.sizeHint().height() * 1.05
         self.btn_pcb_back.setFixedSize(w, h)
         self.btn_pcb_back.clicked.connect(self.back_pcb)
         btn_pcb_layout.addStretch(0)
@@ -429,8 +439,8 @@ class ARCHIVOS(QWidget):
         self.btn_pcb_cont = QPushButton("Continuar")
         self.btn_pcb_cont.setStyleSheet(style)
         self.btn_pcb_cont.setFont(QFont("Georgia", 10, QFont.Bold))
-        w = self.btn_pcb_cont.sizeHint().width() + 100
-        h = self.btn_pcb_cont.sizeHint().height() + 5
+        w = self.btn_pcb_cont.sizeHint().width() * 1.5
+        h = self.btn_pcb_cont.sizeHint().height() * 1.05
         self.btn_pcb_cont.setFixedSize(w, h)
         self.btn_pcb_cont.clicked.connect(self.cont_pcb)
         btn_pcb_layout.addWidget(self.btn_pcb_cont, alignment = Qt.AlignCenter)
@@ -448,7 +458,7 @@ class ARCHIVOS(QWidget):
         lbl_final = QLabel("EJECUCIÓN")
         lbl_final.setAlignment(Qt.AlignCenter)
         lbl_final.setStyleSheet("border: 1px solid black; background-color: lightgreen")
-        w = lbl_final.sizeHint().width() + 10
+        w = lbl_final.sizeHint().width() * 1.1
         h = lbl_final.sizeHint().height()
         lbl_final.setFixedSize(w, h)
         final_layout.addWidget(lbl_final, alignment = Qt.AlignCenter)
@@ -475,8 +485,8 @@ class ARCHIVOS(QWidget):
         
         self.btn_final_back.setStyleSheet(style)
         self.btn_final_back.setFont(QFont("Georgia", 10, QFont.Bold))
-        w = self.btn_final_back.sizeHint().width() + 100
-        h = self.btn_final_back.sizeHint().height() + 5
+        w = self.btn_final_back.sizeHint().width() * 1.5
+        h = self.btn_final_back.sizeHint().height() * 1.05
         self.btn_final_back.setFixedSize(w, h)
         self.btn_final_back.clicked.connect(self.back_final)
         final_layout.addWidget(self.btn_final_back, alignment = Qt.AlignCenter)
@@ -597,13 +607,8 @@ class ARCHIVOS(QWidget):
         self.btn_top.setLayout(top_ly)
         self.btn_bottom.setLayout(bot_ly)
         
-        w = top_lbl.sizeHint().width() + 10
-        # print(w)
-        h = top_lbl.sizeHint().height() + lbl1.sizeHint().height() + 50
-        # print(h)
-        
-        # x = top_ly.sizeHint()
-        # print(x)
+        w = top_lbl.sizeHint().width() * 1.1
+        h = top_lbl.sizeHint().height() + lbl1.sizeHint().height() * 1.2
     
         self.btn_top.setFixedSize(w, h)
         self.btn_bottom.setFixedSize(w, h)
@@ -711,7 +716,7 @@ class ARCHIVOS(QWidget):
         self.stacked_layout.setCurrentIndex(2)    
         gbr.genImageList(self.file_name, self.top, self.new_list)
         im = QPixmap("board-list.png")
-        im = im.scaled(self.w - 200, self.w - 200, Qt.KeepAspectRatio)
+        im = im.scaled(self.w * 0.95, self.w * 0.95, Qt.KeepAspectRatio)
         self.lbl.setPixmap(im)
         self.lbl.adjustSize()
         

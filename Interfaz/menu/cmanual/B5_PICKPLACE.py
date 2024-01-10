@@ -13,9 +13,17 @@ Alumnos:
 TOOL: PICK & PLACE
 """
 
-
-import sys
 import os
+import sys
+# Dirección de imagen
+# path = os.getcwd()
+path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.name == 'nt':
+    aux_path = os.path.join(path, 'Interfaz\code_aux')
+else:
+    aux_path = os.path.join(path, 'Interfaz/code_aux')
+sys.path.insert(0, aux_path)
+
 from PyQt5.QtCore import Qt,QTimer, QSize
 # import PyQt5.QtGui as pyGui
 from PyQt5.QtGui import QPixmap, QFont, QDoubleValidator
@@ -46,8 +54,12 @@ import numpy as np
 import ESP32_serial as esp
 
 # Dirección de imagen
-path = os.getcwd()
-img_tool = os.path.join(path, 'Interfaz/imagenes/tool_pp.png')
+#path = os.getcwd()
+path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.name == 'nt':
+    img_tool = os.path.join(path, 'imagenes\\tool_pp.png')
+else:
+    img_tool = os.path.join(path, 'imagenes/tool_pp.png')
 
 class TOOL_P(QHBoxLayout):
     # Constructor
@@ -224,7 +236,7 @@ class TOOL_P(QHBoxLayout):
         self.edit_sensor.setAlignment(Qt.AlignRight)
         self.edit_sensor.setReadOnly(True)
         w = 200
-        h = self.edit_sensor.sizeHint().height() + 5
+        h = self.edit_sensor.sizeHint().height() * 1.05
         self.edit_sensor.setFixedSize(w, h)
         sensor_layout.addWidget(self.edit_sensor, alignment = Qt.AlignCenter)
 
@@ -232,7 +244,7 @@ class TOOL_P(QHBoxLayout):
         self.lbl_rad = QLabel("rad")
         self.lbl_rad.setStyleSheet(st_normal)
         self.lbl_rad.adjustSize()
-        w = self.lbl_rad.sizeHint().width() + 10
+        w = self.lbl_rad.sizeHint().width() * 1.1
         self.lbl_rad.setFixedWidth(w)
         sensor_layout.addWidget(self.lbl_rad, alignment = Qt.AlignCenter)
 
@@ -249,7 +261,7 @@ class TOOL_P(QHBoxLayout):
         self.spb_angle.setMaximum(360)
         self.spb_angle.setSingleStep(1)
         self.spb_angle.setSuffix(" °")
-        w = self.spb_angle.sizeHint().width() + 20
+        w = self.spb_angle.sizeHint().width() * 1.15
         h = int(0.4 * w)
         self.spb_angle.setFixedSize(w, h)
         self.spb_angle.setValue(0)
@@ -262,8 +274,8 @@ class TOOL_P(QHBoxLayout):
         self.btn_send.clicked.connect(self.move_pnp)
         self.btn_send.setStyleSheet(st_btn)
         self.btn_send.setIconSize(QSize(self.icon_size, self.icon_size))   # Ajustar tamaño de ícono
-        w = self.btn_send.sizeHint().width() + 10
-        h = self.btn_send.sizeHint().height() + 10
+        w = self.btn_send.sizeHint().width() * 1.1
+        h = self.btn_send.sizeHint().height() * 1.1
         self.btn_send.setFixedSize(w, h)
         angle_layout.addSpacing(10)
         angle_layout.addWidget(self.btn_send, alignment = Qt.AlignCenter)
@@ -273,8 +285,8 @@ class TOOL_P(QHBoxLayout):
         self.btn_bv = QPushButton(icon, "")
         self.btn_bv.setIconSize(QSize(self.sw_size, self.sw_size))
         self.btn_bv.setStyleSheet(st_btn)
-        w = self.btn_bv.sizeHint().width() + 10
-        h = self.btn_bv.sizeHint().height() + 10
+        w = self.btn_bv.sizeHint().width() * 1.1
+        h = self.btn_bv.sizeHint().height() * 1.1
         self.btn_bv.setFixedSize(w, h)
         self.btn_bv.setCheckable(True)
         self.btn_bv.clicked.connect(self.sel_active)

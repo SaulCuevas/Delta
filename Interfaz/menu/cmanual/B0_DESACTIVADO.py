@@ -15,6 +15,7 @@ TOOL: DESACTIVADO
 
 
 import os
+import sys
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import (
@@ -23,8 +24,12 @@ from PyQt5.QtWidgets import (
 
 
 # Dirección de imagen
-path = os.getcwd()
-img_tool = os.path.join(path, 'Interfaz/imagenes/delta.jpg')
+#path = os.getcwd()
+path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.name == 'nt':
+    img_tool = os.path.join(path, 'imagenes\delta.jpg')
+else:
+    img_tool = os.path.join(path, 'imagenes/delta.jpg')
 
 class DESACTIVADO(QHBoxLayout):
     # Constructor
@@ -53,7 +58,6 @@ class DESACTIVADO(QHBoxLayout):
     # ---- LAYOUT PRINCIPAL ----------------
 
         # Label 01: Imagen Carrito
-        print(img_tool)
         im = QPixmap(img_tool)
         h = int(self.h * 0.8)
         im = im.scaled(h, h, Qt.KeepAspectRatio)

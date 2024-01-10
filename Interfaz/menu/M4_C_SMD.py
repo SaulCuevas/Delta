@@ -162,7 +162,7 @@ class SMD(QWidget):
         lbl_smd = QLabel("SMD Válidos") # Generar Label Ventana INVENTARIO SMD
         lbl_smd.setAlignment(Qt.AlignCenter)    # Alinear texto en el centro
         lbl_smd.setStyleSheet(st_label) # Fijar estilo de widget
-        w = lbl_smd.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = lbl_smd.sizeHint().width() * 1.1 # Guardar valor de ancho para widget
         h = lbl_smd.sizeHint().height() # Guardar valor de alto para widget
         lbl_smd.setFixedSize(w, h)  # Ajustar valores de ancho (w) y alto (h) para widget
         main_layout.addWidget(lbl_smd, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT PRINCIPAL
@@ -482,7 +482,7 @@ class SMD(QWidget):
         self.btn_start = QPushButton("Volver")  # Generar PushBUtton VOLVER A MENU
         self.btn_start.setStyleSheet(st_btn)    # Fijar estilo de widget
         w = self.btn_start.sizeHint().width() * 1.3 # Guardar valor de ancho para widget
-        h = self.btn_start.sizeHint().height() + 10  # Guardar valor de alto para widget
+        h = self.btn_start.sizeHint().height() * 1.1  # Guardar valor de alto para widget
         self.btn_start.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         main_layout.addWidget(self.btn_start, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT PRINCIPAL
         

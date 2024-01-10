@@ -15,6 +15,7 @@ TOOL: INVENTARIO
 
 
 import os
+import sys
 from PyQt5.QtCore import Qt, QSize
 # import PyQt5.QtGui as pyGui
 from PyQt5.QtGui import QPixmap
@@ -33,8 +34,12 @@ import numpy as np
 import ESP32_serial as esp
 
 # Dirección de imagen
-path = os.getcwd()
-img_tool = os.path.join(path, 'Interfaz/imagenes/tool_pp.png')
+#path = os.getcwd()
+path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.name == 'nt':
+    img_tool = os.path.join(path, 'imagenes\\tool_pp.png')
+else:
+    img_tool = os.path.join(path, 'imagenes/tool_pp.png')
 
 class INVENTORY(QHBoxLayout):
     # Constructor
@@ -44,7 +49,6 @@ class INVENTORY(QHBoxLayout):
         self.ser = ser
         self.w = base
         self.h = altura
-        print(f"self.h: {self.h}")
         # Inicialización de variables auxiliares
         self.font_size1 = int(self.h/12) # Valor de fuente 1 ajustado a tamaño pantalla
         self.font_size2 = int(self.h/18) # Valor de fuente 2 ajustado a tamaño pantalla
@@ -127,6 +131,7 @@ class INVENTORY(QHBoxLayout):
     # ---- LAYOUT PRINCIPAL ----------------
 
         # Label 01: Imagen Carrito
+        print(f"B1: {img_tool}")
         im = QPixmap(img_tool)
         h = self.h * 0.8
         im = im.scaled(h, h, Qt.KeepAspectRatio)
@@ -157,13 +162,13 @@ class INVENTORY(QHBoxLayout):
         self.edit_sensor = QLineEdit()
         self.edit_sensor.setStyleSheet(st_le)
         self.edit_sensor.setReadOnly(True)
-        self.edit_sensor.setFixedWidth(150)
+        self.edit_sensor.setFixedWidth(self.w * 0.2)
         sensor_layout.addWidget(self.edit_sensor, alignment = Qt.AlignCenter)
 
         # Label 04: Texto Radianes
         self.lbl_rad = QLabel("rad")
         self.lbl_rad.adjustSize()
-        w = self.lbl_rad.sizeHint().width() + 50
+        w = self.lbl_rad.sizeHint().width() * 5
         self.lbl_rad.setFixedWidth(w)
         self.lbl_rad.setStyleSheet(st_normal)
         sensor_layout.addWidget(self.lbl_rad, alignment = Qt.AlignCenter)
@@ -181,7 +186,7 @@ class INVENTORY(QHBoxLayout):
         self.spb_angle.setMaximum(360)
         self.spb_angle.setSingleStep(1)
         self.spb_angle.setSuffix(" °")
-        w = self.spb_angle.sizeHint().width() + 20
+        w = self.spb_angle.sizeHint().width() * 1.2
         h = int(0.4 * w)
         self.spb_angle.setFixedSize(w, h)
         self.spb_angle.setValue(0)
@@ -194,8 +199,8 @@ class INVENTORY(QHBoxLayout):
         self.btn_send.clicked.connect(self.move_inventory)
         self.btn_send.setStyleSheet(st_btn)
         self.btn_send.setIconSize(QSize(self.icon_size, self.icon_size))   # Ajustar tamaño de ícono
-        w = self.btn_send.sizeHint().width() + 10
-        h = self.btn_send.sizeHint().height() + 10
+        w = self.btn_send.sizeHint().width() * 1.1
+        h = self.btn_send.sizeHint().height() * 1.1
         self.btn_send.setFixedSize(w, h)
         angle_layout.addSpacing(10)
         angle_layout.addWidget(self.btn_send, alignment = Qt.AlignCenter)

@@ -31,8 +31,12 @@ import qtawesome as qta
 import ESP32_serial as esp
 
 # Dirección de imagen
-path = os.getcwd()
-img_tool = os.path.join(path, 'Interfaz/imagenes/tool_soldadura.png')
+#path = os.getcwd()
+path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.name == 'nt':
+    img_tool = os.path.join(path, 'imagenes\\tool_soldadura.png')
+else:
+    img_tool = os.path.join(path, 'imagenes/tool_soldadura.png')
 
 class TOOL_S(QHBoxLayout):
     # Constructor
@@ -201,7 +205,7 @@ class TOOL_S(QHBoxLayout):
         self.edit_periodo.setStyleSheet(st_le)
         self.edit_periodo.setAlignment(Qt.AlignRight)
         w = 200
-        h = self.edit_periodo.sizeHint().height() + 5
+        h = self.edit_periodo.sizeHint().height() * 1.05
         self.edit_periodo.setFixedSize(w, h)
         periodo_layout.addWidget(self.edit_periodo, alignment = Qt.AlignCenter)
 
@@ -223,7 +227,7 @@ class TOOL_S(QHBoxLayout):
         self.spb_amplitud.setMaximum(100)
         self.spb_amplitud.setSingleStep(1)
         self.spb_amplitud.setStyleSheet(st_spb)
-        w = self.spb_amplitud.sizeHint().width() + 20
+        w = self.spb_amplitud.sizeHint().width() * 1.15
         h = int(0.4 * w)
         self.spb_amplitud.setFixedSize(w, h)
         self.spb_amplitud.setValue(self.amplitud)
@@ -244,8 +248,8 @@ class TOOL_S(QHBoxLayout):
         icon = qta.icon("mdi.arrow-up-bold-hexagon-outline")
         self.btn_up = QPushButton(icon, "")
         self.btn_up.setIconSize(QSize(self.sw_size, self.sw_size))
-        w = self.btn_up.sizeHint().width() + 10
-        h = self.btn_up.sizeHint().height() + 10
+        w = self.btn_up.sizeHint().width() * 1.1
+        h = self.btn_up.sizeHint().height() * 1.1
         self.btn_up.setFixedSize(w, h)
         self.btn_up.setStyleSheet(st_btn)
         self.btn_up.pressed.connect(self.move_up)
@@ -256,8 +260,8 @@ class TOOL_S(QHBoxLayout):
         icon = qta.icon("mdi.arrow-down-bold-hexagon-outline")
         self.btn_down = QPushButton(icon, "")
         self.btn_down.setIconSize(QSize(self.sw_size, self.sw_size))
-        w = self.btn_down.sizeHint().width() + 10
-        h = self.btn_down.sizeHint().height() + 10
+        w = self.btn_down.sizeHint().width() * 1.1
+        h = self.btn_down.sizeHint().height() * 1.1
         self.btn_down.setFixedSize(w, h)
         self.btn_down.setStyleSheet(st_btn)
         self.btn_down.pressed.connect(self.move_down)

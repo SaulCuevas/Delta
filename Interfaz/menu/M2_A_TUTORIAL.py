@@ -87,7 +87,7 @@ class TUTORIAL(QWidget):
         lbl_tutorial.setAlignment(Qt.AlignCenter)   # Alinear texto en el centro
         lbl_tutorial.setStyleSheet(st_label)    # Fijar estilo de widget
         w = lbl_tutorial.sizeHint().width() * 1.3    # Guardar valor de ancho para widget
-        h = lbl_tutorial.sizeHint().height() + 5   # Guardar valor de alto para widget
+        h = lbl_tutorial.sizeHint().height() * 1.05   # Guardar valor de alto para widget
         lbl_tutorial.setFixedSize(w, h) # Ajustar valores de ancho (w) y alto (h) para widget
         main_layout.addWidget(lbl_tutorial, alignment = Qt.AlignCenter) # Agregar widget a LAYOUT GENERAL
 
@@ -102,7 +102,7 @@ class TUTORIAL(QWidget):
         self.btn_start = QPushButton("Volver")  # Generar PushBUtton VOLVER A MENU
         self.btn_start.setStyleSheet(st_btn)    # Fijar estilo para widget
         w = self.btn_start.sizeHint().width() * 1.3 # Guardar valor de ancho para widget
-        h = self.btn_start.sizeHint().height() + 10  # Guardar valor de alto para widget
+        h = self.btn_start.sizeHint().height() * 1.05  # Guardar valor de alto para widget
         self.btn_start.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         main_layout.addWidget(self.btn_start, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT GENERAL
         

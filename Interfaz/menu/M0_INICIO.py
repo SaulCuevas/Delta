@@ -30,7 +30,10 @@ import os
 # Dirección de imagen
 # path = os.getcwd()
 path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-img_delta = os.path.join(path, 'Interfaz/imagenes/delta.jpg')
+if os.name == 'nt':
+    img_delta = os.path.join(path, 'Interfaz\imagenes\delta.jpg')
+else:
+    img_delta = os.path.join(path, 'Interfaz/imagenes/delta.jpg')
 
 # CLASE INICIO - WIDGET
 class INICIO(QWidget):
@@ -91,8 +94,8 @@ class INICIO(QWidget):
         # Button 01: Inicio de programa
         self.btn_iniciar = QPushButton("INICIAR")   # Generar PushButton de INICIO
         self.btn_iniciar.setStyleSheet(style) # Fijar estilo de Widget
-        w = self.btn_iniciar.sizeHint().width() + 70  # Guardar valor de ancho para button
-        h = self.btn_iniciar.sizeHint().height() + 10 # Guardar valor de alto para button
+        w = self.btn_iniciar.sizeHint().width() * 1.35  # Guardar valor de ancho para button
+        h = self.btn_iniciar.sizeHint().height() * 1.05 # Guardar valor de alto para button
         self.btn_iniciar.setFixedSize(w, h) # AJustar valores de ancho (w) y alto (h) para button
         inicio_layout.addWidget(self.btn_iniciar, alignment = Qt.AlignCenter) # Agregar widget a LAYOUT INICIO
     

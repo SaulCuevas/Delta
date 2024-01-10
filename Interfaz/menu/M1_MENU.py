@@ -37,9 +37,9 @@ import qtawesome as qta
 # path = os.getcwd()
 path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if os.name == 'nt':
-    aux_path = os.path.join(path, 'Interfaz\_aux')
+    aux_path = os.path.join(path, 'Interfaz\code_aux')
 else:
-    aux_path = os.path.join(path, 'Interfaz/_aux')
+    aux_path = os.path.join(path, 'Interfaz/code_aux')
 sys.path.insert(0, aux_path)
 import ESP32_serial as esp
 
@@ -160,7 +160,7 @@ class MENU(QWidget):
         lbl_com_port = QLabel("COM port:")  # Generar Label PORT
         lbl_com_port.setAlignment(Qt.AlignCenter)   # Alinear texto al centro
         lbl_com_port.setStyleSheet(st_label)    # Fijar estilo de widget
-        w = lbl_com_port.sizeHint().width() + 10    # Guardar valor de ancho para widget
+        w = lbl_com_port.sizeHint().width() * 1.05    # Guardar valor de ancho para widget
         h = lbl_com_port.sizeHint().height()    # Guardar valor de alto para widget
         lbl_com_port.setFixedSize(w, h) # Ajustar valores de ancho (w) y alto (h) para widget
         special_layout.addWidget(lbl_com_port, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT ESPECIAL-> seleccion puerto
@@ -174,7 +174,7 @@ class MENU(QWidget):
         self.cb_port.activated.connect(self.add_port)   # Enlazar con funcion para anexar puerto
         self.cb_port.setStyleSheet(st_cb) # Fijar estilo de widget
         w = int(self.w * 0.3) # Guardar valor de ancho para widget
-        h = self.cb_port.sizeHint().height() + 20    # Guardar valor de alto para widget
+        h = self.cb_port.sizeHint().height() * 2    # Guardar valor de alto para widget
         self.cb_port.setFixedSize(w, h) # Ajustar valores de ancho (w) y alto (h) para widget
         special_layout.addWidget(self.cb_port, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT ESPECIAL-> seleccion puerto
         
@@ -192,40 +192,40 @@ class MENU(QWidget):
         # Button 02: Inicio de TUTORIAL
         self.btn_1 = QPushButton("Tutorial")    # Generar PushBUtton TUTORIAL
         self.btn_1.setStyleSheet(st_btn)    # Fijar estilo de widget
-        w = self.btn_1.sizeHint().width() + 60  # Guardar valor de ancho para widget
-        h = self.btn_1.sizeHint().height() + 20 # Guardar valor de alto para widget
+        w = self.btn_1.sizeHint().width() * 1.3  # Guardar valor de ancho para widget
+        h = self.btn_1.sizeHint().height() * 1.3 # Guardar valor de alto para widget
         self.btn_1.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         menu_layout.addWidget(self.btn_1, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT MENU
         
         # Button 03: Inicio de CONTROL MANUAL
         self.btn_2 = QPushButton("Control Manual")  # Generar PushBUtton CONTROL MANUAL
         self.btn_2.setStyleSheet(st_btn)    # Fijar estilo de widget
-        w = self.btn_2.sizeHint().width() + 60  # Guardar valor de ancho para widget
-        h = self.btn_2.sizeHint().height() + 20 # Guardar valor de alto para widget
+        w = self.btn_2.sizeHint().width() * 1.3  # Guardar valor de ancho para widget
+        h = self.btn_2.sizeHint().height() * 1.3 # Guardar valor de alto para widget
         self.btn_2.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         menu_layout.addWidget(self.btn_2, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT MENU
         
         # Button 04: Inicio de INVENTARIO SMD
         self.btn_3 = QPushButton("SMD válidos") # Generar PushBUtton INVENTARIO SMD
         self.btn_3.setStyleSheet(st_btn)    # Fijar estilo de widget
-        w = self.btn_3.sizeHint().width() + 60  # Guardar valor de ancho para widget
-        h = self.btn_3.sizeHint().height() + 20 # Guardar valor de alto para widget
+        w = self.btn_3.sizeHint().width() * 1.3  # Guardar valor de ancho para widget
+        h = self.btn_3.sizeHint().height() * 1.3 # Guardar valor de alto para widget
         self.btn_3.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         menu_layout.addWidget(self.btn_3, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT MENU
         
         # Button 05: Inicio de ESTADISTICAS
         self.btn_4 = QPushButton("Estadísticas")    # Generar PushBUtton ESTADÍSTICAS
         self.btn_4.setStyleSheet(st_btn)    # Fijar estilo de widget
-        w = self.btn_4.sizeHint().width() + 60  # Guardar valor de ancho para widget
-        h = self.btn_4.sizeHint().height() + 20 # Guardar valor de alto para widget
+        w = self.btn_4.sizeHint().width() * 1.3  # Guardar valor de ancho para widget
+        h = self.btn_4.sizeHint().height() * 1.3 # Guardar valor de alto para widget
         self.btn_4.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         menu_layout.addWidget(self.btn_4, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT MENU
         
         # Button 06: Inicio de COMENZAR OPERACION ENSAMBLE PCBs
         self.btn_5 = QPushButton("Comenzar")    # Generar PushBUtton COMENZAR PROCESO ENSAMBLADO PCBs
         self.btn_5.setStyleSheet(st_btn)    # Fijar estilo de widget
-        w = self.btn_5.sizeHint().width() + 60  # Guardar valor de ancho para widget
-        h = self.btn_5.sizeHint().height() + 20 # Guardar valor de alto para widget
+        w = self.btn_5.sizeHint().width() * 1.3  # Guardar valor de ancho para widget
+        h = self.btn_5.sizeHint().height() * 1.3 # Guardar valor de alto para widget
         self.btn_5.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         menu_layout.addWidget(self.btn_5, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT MENU
         
@@ -244,7 +244,7 @@ class MENU(QWidget):
         self.btn_puerto.setIconSize(QSize(self.font_size1 * 1.5, self.font_size1 * 1.5))
         self.btn_puerto.clicked.connect(self.select_port)
         self.btn_puerto.setStyleSheet(st_alt)   # Fijar estilo de widget
-        w = self.btn_puerto.sizeHint().width() + 10  # Guardar valor de ancho para widget
+        w = self.btn_puerto.sizeHint().width() * 1.05  # Guardar valor de ancho para widget
         self.btn_puerto.setFixedSize(w, h)  # Ajustar valores de ancho (w) y alto (h) para widget
         regreso_layout.addWidget(self.btn_puerto, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT REGRESO
         

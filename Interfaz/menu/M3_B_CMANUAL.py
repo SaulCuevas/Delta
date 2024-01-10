@@ -23,9 +23,9 @@ import sys
 # path = os.getcwd()
 path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 if os.name == 'nt':
-    aux_path = os.path.join(path, 'Interfaz\_aux')
+    aux_path = os.path.join(path, 'Interfaz\code_aux')
 else:
-    aux_path = os.path.join(path, 'Interfaz/_aux')
+    aux_path = os.path.join(path, 'Interfaz/code_aux')
 sys.path.insert(0, aux_path)
 
 from PyQt5.QtCore import Qt,QTimer, QSize
@@ -572,7 +572,7 @@ class CMANUAL(QWidget):
         lbl_cmanual = QLabel("CONTROL MANUAL")  # Generar Label Ventana CONTROL MANUAL
         lbl_cmanual.setAlignment(Qt.AlignCenter)    # Alinear texto en el centro
         lbl_cmanual.setStyleSheet(st_label) # Fijar estilo de widget
-        w = lbl_cmanual.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = lbl_cmanual.sizeHint().width() * 1.05 # Guardar valor de ancho para widget
         h = lbl_cmanual.sizeHint().height() # Guardar valor de alto para widget
         lbl_cmanual.setFixedSize(w, h)  # Ajustar valores de ancho (w) y alto (h) para widget
         main_layout.addStretch(1)   # Anexar espaciado entre widget
@@ -644,7 +644,7 @@ class CMANUAL(QWidget):
         self.cb_tool.setEnabled(False)  # Desactivado al INICIO
         self.cb_tool.setStyleSheet(st_cb)   # Fijar estilo de widget
         self.cb_tool.adjustSize()   # Ajustar tamaño a texto
-        w = self.cb_tool.sizeHint().width() + 10    # Guardar valor de ancho para widget
+        w = self.cb_tool.sizeHint().width() * 1.05    # Guardar valor de ancho para widget
         h = self.cb_tool.sizeHint().height()    # Guardar valor de alto para widget
         self.cb_tool.setFixedSize(w, h) # Ajustar valores de ancho (w) y alto (h) para widget
         ml_tool_layout.addWidget(self.cb_tool, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT HERRAMIENTA
@@ -694,9 +694,9 @@ class CMANUAL(QWidget):
         self.lbl_vel = QLabel("DESACTIVADO")    # Generar Label de VELOCIDAD seleccionada
         self.lbl_vel.setAlignment(Qt.AlignCenter)   # Alinear texto al centro
         self.lbl_vel.setStyleSheet(st_lbl_alt)  # Fijar estilo de widget
-        w = self.lbl_vel.sizeHint().width() # Guardar valor de ancho para widget
+        w = self.lbl_vel.sizeHint().width() * 1.05 # Guardar valor de ancho para widget
         h = self.lbl_vel.sizeHint().height()    # Guardar valor de alto para widget
-        self.lbl_vel.setFixedSize(w + 10, h)    # Ajustar valores de ancho (w) y alto (h) para widget
+        self.lbl_vel.setFixedSize(w, h)    # Ajustar valores de ancho (w) y alto (h) para widget
         ml_vel_layout.addWidget(self.lbl_vel, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT VELOCIDAD
 
         # Configuración VELOCIDAD WIDGET        
@@ -754,7 +754,7 @@ class CMANUAL(QWidget):
         self.lbl_x.setStyleSheet("border: 0px dotted;")
         self.lbl_x.setAlignment(Qt.AlignRight)  # Alinear texto a la derecha
         self.lbl_x.setStyleSheet(st_lbl_alt) # Fijar estilo de widget
-        w = self.lbl_x.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = self.lbl_x.sizeHint().width() * 1.5 # Guardar valor de ancho para widget
         self.lbl_x.setFixedWidth(w) # Ajustar valor de ancho (w) para widget
         x_layout.addWidget(self.lbl_x, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT COORD X
         
@@ -780,7 +780,7 @@ class CMANUAL(QWidget):
         self.x_dim = QLabel("rad")  # Generar Label de Dimension COORD X/M1
         self.x_dim.setStyleSheet("border: 0px dotted;")
         self.x_dim.adjustSize() # Ajustar tamaño a texto
-        w = self.x_dim.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = self.x_dim.sizeHint().width() * 2.5 # Guardar valor de ancho para widget
         self.x_dim.setFixedWidth(w) # Ajustar valor de ancho (w) para widget
         x_layout.addWidget(self.x_dim, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT COORD X
         
@@ -794,7 +794,7 @@ class CMANUAL(QWidget):
         self.lbl_y.setStyleSheet("border: 0px dotted;")
         self.lbl_y.setAlignment(Qt.AlignRight)  # Alinear texto a la derecha
         self.lbl_y.setStyleSheet(st_lbl_alt) # Fijar estilo de widget
-        w = self.lbl_y.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = self.lbl_y.sizeHint().width() * 1.5 # Guardar valor de ancho para widget
         self.lbl_y.setFixedWidth(w) # Ajustar valor de ancho (w) para widget
         y_layout.addWidget(self.lbl_y, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT COORD Y
         
@@ -820,7 +820,7 @@ class CMANUAL(QWidget):
         self.y_dim = QLabel("rad")   # Generar Label de Dimension COORD Y/M2
         self.y_dim.setStyleSheet("border: 0px dotted;")
         self.y_dim.adjustSize() # Ajustar tamaño a texto
-        w = self.y_dim.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = self.y_dim.sizeHint().width() * 2.5 # Guardar valor de ancho para widget
         self.y_dim.setFixedWidth(w) # Ajustar valor de ancho (w) para widget
         y_layout.addWidget(self.y_dim, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT COORD Y
         
@@ -834,7 +834,7 @@ class CMANUAL(QWidget):
         self.lbl_z.setStyleSheet("border: 0px dotted;")
         self.lbl_z.setAlignment(Qt.AlignRight)  # Alinear texto a la derecha
         self.lbl_z.setStyleSheet(st_lbl_alt) # Fijar estilo de widget
-        w = self.lbl_z.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = self.lbl_z.sizeHint().width() * 1.5 # Guardar valor de ancho para widget
         self.lbl_z.setFixedWidth(w)    # Ajustar valor de ancho (w) para widget
         z_layout.addWidget(self.lbl_z, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT COORD Z
         
@@ -860,7 +860,7 @@ class CMANUAL(QWidget):
         self.z_dim = QLabel("rad")   # Generar Label de Dimension COORD Z/M3
         self.z_dim.setStyleSheet("border: 0px dotted;")
         self.z_dim.adjustSize() # Ajustar tamaño a texto
-        w = self.z_dim.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = self.z_dim.sizeHint().width() * 2.5 # Guardar valor de ancho para widget
         self.z_dim.setFixedWidth(w) # Ajustar valor de ancho (w) para widget
         z_layout.addWidget(self.z_dim, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT COORD Z
 
@@ -887,9 +887,9 @@ class CMANUAL(QWidget):
         self.btn_arrow.setEnabled(False)    # Desactivado al INICIO
         self.btn_arrow.setIconSize(QSize(40, 40))   # Ajustar tamaño de ícono
         self.btn_arrow.setStyleSheet(st_act_btn) # Fijar estilo de widget
-        w = self.btn_arrow.sizeHint().width()   # Guardar valor de ancho para widget
-        h = self.btn_arrow.sizeHint().height()  # Guardar valor de alto para widget
-        self.btn_arrow.setFixedSize(w + 10, h + 10) # Ajustar valores de ancho (w) y alto (h) para widget
+        w = self.btn_arrow.sizeHint().width() * 1.05   # Guardar valor de ancho para widget
+        h = self.btn_arrow.sizeHint().height() *1.05  # Guardar valor de alto para widget
+        self.btn_arrow.setFixedSize(w, h) # Ajustar valores de ancho (w) y alto (h) para widget
         self.btn_arrow.clicked.connect(self.set_coords) # Conectar a función para actualizar coordenadas
         ml_action_layout.addStretch()
         ml_action_layout.addWidget(self.btn_arrow, alignment = Qt.AlignCenter)  # Agregar widget a LAYOUT ACCION
@@ -901,9 +901,9 @@ class CMANUAL(QWidget):
         self.btn_msg.setEnabled(False)  # Fijar estilo de widget
         self.btn_msg.setIconSize(QSize(30, 30)) # Ajustar tamaño de ícono
         self.btn_msg.setStyleSheet(st_act_btn)   # Fijar estilo de widget
-        w = self.btn_msg.sizeHint().width() # Guardar valor de ancho para widget
-        h = self.btn_msg.sizeHint().height()    # Guardar valor de alto para widget
-        self.btn_msg.setFixedSize(w + 10, h + 10)   # Ajustar valores de ancho (w) y alto (h) para widget
+        w = self.btn_msg.sizeHint().width() * 1.05 # Guardar valor de ancho para widget
+        h = self.btn_msg.sizeHint().height() * 1.05    # Guardar valor de alto para widget
+        self.btn_msg.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         self.btn_msg.clicked.connect(self.send_msg) # Conectar a función para enviar mensaje a PORT
         ml_action_layout.addWidget(self.btn_msg, alignment = Qt.AlignCenter)    # Agregar widget a LAYOUT ACCION
         ml_action_layout.addStretch()
@@ -1140,8 +1140,8 @@ class CMANUAL(QWidget):
         self.lbl_typecrd = QLabel("RECTANGULARES")  # Generar Label de Etiqueta coordenadas
         self.lbl_typecrd.setAlignment(Qt.AlignCenter)   # Alinear texto en el centro
         self.lbl_typecrd.setStyleSheet(st_lbl_coord)   # Fijar estilo de widget
-        w = self.lbl_typecrd.sizeHint().width() + 20    # Guardar valor de ancho para widget
-        h = self.lbl_typecrd.sizeHint().height() + 10   # Guardar valor de alto para widget
+        w = self.lbl_typecrd.sizeHint().width() * 1.1    # Guardar valor de ancho para widget
+        h = self.lbl_typecrd.sizeHint().height() * 1.05   # Guardar valor de alto para widget
         self.lbl_typecrd.setFixedSize(w, h) # Ajustar valores de ancho (w) y alto (h) para widget
         sw_coord_layout.addWidget(self.lbl_typecrd, alignment = Qt.AlignCenter) # Agregar widget a LAYOUT CONTROL POS
         
@@ -1229,7 +1229,7 @@ class CMANUAL(QWidget):
         lbl_disable = QLabel("DESACTIVADO")  # Generar Label Titulo Herramienta Desactivada
         lbl_disable.setStyleSheet(st_lbl_aux) # Fijar estilo de widget
         lbl_disable.setAlignment(Qt.AlignCenter)  # Alinear texto al centro
-        w = lbl_disable.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = lbl_disable.sizeHint().width() * 1.05 # Guardar valor de ancho para widget
         h = lbl_disable.sizeHint().height() # Guardar valor de alto para widget
         lbl_disable.setFixedSize(w, h)  # Ajustar valores de ancho (w) y alto (h) para widget
         disable_layout.addWidget(lbl_disable, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT TOOL
@@ -1251,7 +1251,7 @@ class CMANUAL(QWidget):
         lbl_inventory = QLabel("INVENTARIO")  # Generar Label Titulo Herramienta Desactivada
         lbl_inventory.setStyleSheet(st_lbl_aux) # Fijar estilo de widget
         lbl_inventory.setAlignment(Qt.AlignCenter)  # Alinear texto al centro
-        w = lbl_inventory.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = lbl_inventory.sizeHint().width() * 1.05 # Guardar valor de ancho para widget
         h = lbl_inventory.sizeHint().height() # Guardar valor de alto para widget
         lbl_inventory.setFixedSize(w, h)  # Ajustar valores de ancho (w) y alto (h) para widget
         inventory_layout.addWidget(lbl_inventory, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT TOOL
@@ -1273,7 +1273,7 @@ class CMANUAL(QWidget):
         lbl_polea = QLabel("POLEA")    # Generar Label Titulo Herramienta Ninguna
         lbl_polea.setStyleSheet(st_lbl_aux) # Fijar estilo de widget
         lbl_polea.setAlignment(Qt.AlignCenter)  # Alinear texto al centro
-        w = lbl_polea.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = lbl_polea.sizeHint().width() * 1.05 # Guardar valor de ancho para widget
         h = lbl_polea.sizeHint().height() # Guardar valor de alto para widget
         lbl_polea.setFixedSize(w, h)  # Ajustar valores de ancho (w) y alto (h) para widget
         polea_layout.addWidget(lbl_polea, alignment = Qt.AlignCenter) # Agregar widget a LAYOUT TOOL
@@ -1293,7 +1293,7 @@ class CMANUAL(QWidget):
         lbl_camera = QLabel("CÁMARA")   # Generar Label Titulo Herramienta Cámara
         lbl_camera.setStyleSheet(st_lbl_aux) # Fijar estilo de widget
         lbl_camera.setAlignment(Qt.AlignCenter)  # Alinear texto al centro
-        w = lbl_camera.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = lbl_camera.sizeHint().width() * 1.05 # Guardar valor de ancho para widget
         h = lbl_camera.sizeHint().height() # Guardar valor de alto para widget
         lbl_camera.setFixedSize(w, h)  # Ajustar valores de ancho (w) y alto (h) para widget
         camera_layout.addWidget(lbl_camera, alignment = Qt.AlignCenter) # Agregar widget a LAYOUT TOOL
@@ -1313,7 +1313,7 @@ class CMANUAL(QWidget):
         lbl_solder = QLabel("SOLDADURA")    # Generar Label Titulo Herramienta Soldadura
         lbl_solder.setStyleSheet(st_lbl_aux) # Fijar estilo de widget
         lbl_solder.setAlignment(Qt.AlignCenter)  # Alinear texto al centro
-        w = lbl_solder.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = lbl_solder.sizeHint().width() * 1.05 # Guardar valor de ancho para widget
         h = lbl_solder.sizeHint().height() # Guardar valor de alto para widget
         lbl_solder.setFixedSize(w, h)  # Ajustar valores de ancho (w) y alto (h) para widget
         solder_layout.addWidget(lbl_solder, alignment = Qt.AlignCenter) # Agregar widget a LAYOUT TOOL
@@ -1333,7 +1333,7 @@ class CMANUAL(QWidget):
         lbl_pp = QLabel("PICK & PLACE") # Generar Label Titulo Herramienta PnP
         lbl_pp.setStyleSheet(st_lbl_aux) # Fijar estilo de widget
         lbl_pp.setAlignment(Qt.AlignCenter)  # Alinear texto al centro
-        w = lbl_pp.sizeHint().width() + 10 # Guardar valor de ancho para widget
+        w = lbl_pp.sizeHint().width() * 1.05 # Guardar valor de ancho para widget
         h = lbl_pp.sizeHint().height() # Guardar valor de alto para widget
         lbl_pp.setFixedSize(w, h)  # Ajustar valores de ancho (w) y alto (h) para widget
         pp_layout.addWidget(lbl_pp, alignment = Qt.AlignCenter) # Agregar widget a LAYOUT TOOL
@@ -1409,7 +1409,7 @@ class CMANUAL(QWidget):
         self.btn_start = QPushButton("Volver")  # Generar PushBUtton VOLVER A MENU  
         self.btn_start.setStyleSheet(st_btn)    # Fijar estilo de widget
         w = self.btn_start.sizeHint().width() * 1.3 # Guardar valor de ancho para widget
-        h = self.btn_start.sizeHint().height() + 10  # Guardar valor de alto para widget
+        h = self.btn_start.sizeHint().height() * 1.05  # Guardar valor de alto para widget
         self.btn_start.setFixedSize(w, h)   # Ajustar valores de ancho (w) y alto (h) para widget
         self.btn_start.clicked.connect(self.stop_cam)   # Conectar a función para detener cámara
         main_layout.addWidget(self.btn_start, alignment = Qt.AlignCenter)   # Agregar widget a LAYOUT PRINCIPAL
@@ -1435,9 +1435,9 @@ class CMANUAL(QWidget):
             self.y_dim.setText("°")
             self.z_dim.setText("°")
         else:
-            x_text = f"{self.m1_rad_sp:.2f}"
-            y_text = f"{self.m2_rad_sp:.2f}"
-            z_text = f"{self.m3_rad_sp:.2f}"
+            x_text = f"{self.m1_rad_sp:.4f}"
+            y_text = f"{self.m2_rad_sp:.4f}"
+            z_text = f"{self.m3_rad_sp:.4f}"
             self.x_dim.setText("rad")
             self.y_dim.setText("rad")
             self.z_dim.setText("rad")
@@ -1474,9 +1474,9 @@ class CMANUAL(QWidget):
             self.lbl_z.setText("M3:")
             self.lbl_typecrd.setText('MOTORES')
             if (self.sw_measure.toggle_on == False):
-                x_text = f"{self.m1_rad_sp:.2f}"
-                y_text = f"{self.m2_rad_sp:.2f}"
-                z_text = f"{self.m3_rad_sp:.2f}"
+                x_text = f"{self.m1_rad_sp:.4f}"
+                y_text = f"{self.m2_rad_sp:.4f}"
+                z_text = f"{self.m3_rad_sp:.4f}"
                 self.x_dim.setText('rad')
                 self.y_dim.setText('rad')
                 self.z_dim.setText('rad')
@@ -1558,6 +1558,7 @@ class CMANUAL(QWidget):
         self.chb_tool.setChecked(False)
         self.chb_vel.setChecked(False)
         self.lbl_vel.setText(self.vels[0])
+        self.inc = 0.01
         #Inicialización Timer
         self.timer.start()
 
@@ -1582,53 +1583,33 @@ class CMANUAL(QWidget):
         x = self.x_new.text()
         y = self.y_new.text()
         z = self.z_new.text()
+
         if x != "":
-            self.x_sp = round(float(x), 2)
-            self.m1_rad_sp = round(float(x), 2)
-            self.m1_deg_sp = round(float(x), 2)
+            self.x_sp = float(x)
+            self.m1_rad_sp = float(x)
+            self.m1_deg_sp = float(x)
         if y != "":
-            self.y_sp = round(float(y), 2)
-            self.m2_rad_sp = round(float(y), 2)
-            self.m2_deg_sp = round(float(y), 2)
+            self.y_sp = float(y)
+            self.m2_rad_sp = float(y)
+            self.m2_deg_sp = float(y)
         if z != "":
-            self.z_sp = round(float(z), 2)
-            self.m3_rad_sp = round(float(z), 2)
-            self.m3_deg_sp = round(float(z), 2)
+            self.z_sp = float(z)
+            self.m3_rad_sp = float(z)
+            self.m3_deg_sp = float(z)
 
 
         if self.sw_coord.toggle_on == False:
-            q1, q2, q3, err = eq.DeltaIK(px = self.x_sp, py = self.y_sp, pz = self.z_sp)
-            self.m1_rad_sp = round(q1, 2)
-            self.m2_rad_sp = round(q2, 2)
-            self.m3_rad_sp = round(q3, 2)
-            print(f"Error RAD: {err}")
-            self.m1_deg_sp = round(np.rad2deg(self.m1_rad_sp), 2)
-            self.m2_deg_sp = round(np.rad2deg(self.m2_rad_sp), 2)
-            self.m3_deg_sp = round(np.rad2deg(self.m3_rad_sp), 2)
+            self.actualizar_datos_sp(0)
             x_text = f"{self.x_sp:.2f}"
             y_text = f"{self.y_sp:.2f}"
             z_text = f"{self.z_sp:.2f}"
         elif self.sw_measure.toggle_on == False:
-            self.m1_deg_sp = round(np.rad2deg(self.m1_rad_sp), 2)
-            self.m2_deg_sp = round(np.rad2deg(self.m2_rad_sp), 2)
-            self.m3_deg_sp = round(np.rad2deg(self.m3_rad_sp), 2)
-            px, py, pz, err = eq.DeltaFK(q1 = self.m1_rad_sp, q2 = self.m2_rad_sp, q3 = self.m3_rad_sp)
-            self.x_sp = round(px, 2)
-            self.y_sp = round(py, 2)
-            self.z_sp = round(pz, 2)
-            print(f"Error XYZ: {err}")
-            x_text = f"{self.m1_rad_sp:.2f}"
-            y_text = f"{self.m2_rad_sp:.2f}"
-            z_text = f"{self.m3_rad_sp:.2f}"
+            self.actualizar_datos_sp(1)
+            x_text = f"{self.m1_rad_sp:.4f}"
+            y_text = f"{self.m2_rad_sp:.4f}"
+            z_text = f"{self.m3_rad_sp:.4f}"
         else:
-            self.m1_rad_sp = round(np.deg2rad(self.m1_deg_sp), 2)
-            self.m2_rad_sp = round(np.deg2rad(self.m2_deg_sp), 2)
-            self.m3_rad_sp = round(np.deg2rad(self.m3_deg_sp), 2)
-            px, py, pz, err = eq.DeltaFK(q1 = self.m1_rad_sp, q2 = self.m2_rad_sp, q3 = self.m3_rad_sp)
-            self.x_sp = round(px, 2)
-            self.y_sp = round(py, 2)
-            self.z_sp = round(pz, 2)
-            print(f"Error DEG: {err}")
+            self.actualizar_datos_sp(2)
             x_text = f"{self.m1_deg_sp:.2f}"
             y_text = f"{self.m2_deg_sp:.2f}"
             z_text = f"{self.m3_deg_sp:.2f}"
@@ -1639,65 +1620,203 @@ class CMANUAL(QWidget):
         self.y_new.clear()
         self.z_new.clear()
 
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
+
+    def actualizar_datos_sp(self, x = 3):
+        # Valor actualizado de SET POINT en COORD RECTANGULARES
+        if x == 0:
+            q1, q2, q3, err = eq.DeltaIK(px = self.x_sp, py = self.y_sp, pz = self.z_sp)
+            self.m1_rad_sp = q1
+            self.m2_rad_sp = q2
+            self.m3_rad_sp = q3
+            self.m1_deg_sp = np.rad2deg(self.m1_rad_sp)
+            self.m2_deg_sp = np.rad2deg(self.m2_rad_sp)
+            self.m3_deg_sp = np.rad2deg(self.m3_rad_sp)
+            print(f"Error XYZ: {err}")
+        # Valor actualizado de SET POINT en MOTORES RAD
+        elif x == 1:
+            self.m1_deg_sp = np.rad2deg(self.m1_rad_sp)
+            self.m2_deg_sp = np.rad2deg(self.m2_rad_sp)
+            self.m3_deg_sp = np.rad2deg(self.m3_rad_sp)
+            px, py, pz, err = eq.DeltaFK(q1 = self.m1_rad_sp, q2 = self.m2_rad_sp, q3 = self.m3_rad_sp)
+            self.x_sp = px
+            self.y_sp = py
+            self.z_sp = pz
+            print(f"Error RAD: {err}")
+        # Valor actualizado de SET POINT en MOTORES DEG
+        elif x == 2:
+            self.m1_rad_sp = np.deg2rad(self.m1_deg_sp)
+            self.m2_rad_sp = np.deg2rad(self.m2_deg_sp)
+            self.m3_rad_sp = np.deg2rad(self.m3_deg_sp)
+            px, py, pz, err = eq.DeltaFK(q1 = self.m1_rad_sp, q2 = self.m2_rad_sp, q3 = self.m3_rad_sp)
+            self.x_sp = px
+            self.y_sp = py
+            self.z_sp = pz
+            print(f"Error DEG: {err}")
+        # Error: NO definido
+        else:
+            print("ERROR")
+
     def m1_neg(self):
-        self.m1_sp -= self.inc
-        print(self.m1_sp)
-        self.x_coord.setText(str(self.m1_sp))
+        # Valor en radianes
+        if self.sw_measure.toggle_on == False:
+            self.m1_rad_sp -= np.deg2rad(self.inc)
+            self.actualizar_datos_sp(1)
+            self.x_coord.setText(f"{self.m1_rad_sp:.4f}")
+        # Valor en grados
+        else:
+            self.m1_deg_sp -= self.inc
+            self.actualizar_datos_sp(2)
+            self.x_coord.setText(f"{self.m1_deg_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
 
     def m1_pos(self):
-        self.m1_sp += self.inc
-        print(self.m1_sp)
-        self.x_coord.setText(str(self.m1_sp))
+        # Valor en radianes
+        if self.sw_measure.toggle_on == False:
+            self.m1_rad_sp += np.deg2rad(self.inc)
+            self.actualizar_datos_sp(1)
+            self.x_coord.setText(f"{self.m1_rad_sp:.4f}")
+        # Valor en grados
+        else:
+            self.m1_deg_sp += self.inc
+            self.actualizar_datos_sp(2)
+            self.x_coord.setText(f"{self.m1_deg_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
         
     def m2_neg(self):
-        self.m2_sp -= self.inc
-        print(self.m2_sp)
-        self.y_coord.setText(str(self.m2_sp))
+        # Valor en radianes
+        if self.sw_measure.toggle_on == False:
+            self.m2_rad_sp -= np.deg2rad(self.inc)
+            self.actualizar_datos_sp(1)
+            self.y_coord.setText(f"{self.m2_rad_sp:.4f}")
+        # Valor en grados
+        else:
+            self.m2_deg_sp -= self.inc
+            self.actualizar_datos_sp(2)
+            self.y_coord.setText(f"{self.m2_deg_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
+
 
     def m2_pos(self):
-        self.m2_sp += self.inc
-        print(self.m2_sp)
-        self.y_coord.setText(str(self.m2_sp))
+        # Valor en radianes
+        if self.sw_measure.toggle_on == False:
+            self.m2_rad_sp += np.deg2rad(self.inc)
+            self.actualizar_datos_sp(1)
+            self.y_coord.setText(f"{self.m2_rad_sp:.4f}")
+        # Valor en grados
+        else:
+            self.m2_deg_sp += self.inc
+            self.actualizar_datos_sp(2)
+            self.y_coord.setText(f"{self.m2_deg_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
 
     def m3_neg(self):
-        self.m3_sp -= self.inc
-        print(self.m3_sp)
-        self.z_coord.setText(str(self.m3_sp))
+        # Valor en radianes
+        if self.sw_measure.toggle_on == False:
+            self.m3_rad_sp -= np.deg2rad(self.inc)
+            self.actualizar_datos_sp(1)
+            self.z_coord.setText(f"{self.m3_rad_sp:.4f}")
+        # Valor en grados
+        else:
+            self.m3_deg_sp -= self.inc
+            self.actualizar_datos_sp(2)
+            self.z_coord.setText(f"{self.m3_deg_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
+
 
     def m3_pos(self):
-        self.m3_sp += self.inc
-        print(self.m3_sp)
-        self.z_coord.setText(str(self.m3_sp))
+        # Valor en radianes
+        if self.sw_measure.toggle_on == False:
+            self.m3_rad_sp += np.deg2rad(self.inc)
+            self.actualizar_datos_sp(1)
+            self.z_coord.setText(f"{self.m3_rad_sp:.4f}")
+        # Valor en grados
+        else:
+            self.m3_deg_sp += self.inc
+            self.actualizar_datos_sp(2)
+            self.z_coord.setText(f"{self.m3_deg_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
 
     def x_neg(self):
+        # Valor en coordenadas rectangulares
         self.x_sp -= self.inc
-        print(self.x_sp)
-        self.x_coord.setText(str(self.x_sp))
+        self.actualizar_datos_sp(0)
+        self.x_coord.setText(f"{self.x_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
 
     def x_pos(self):
+        # Valor en coordenadas rectangulares
         self.x_sp += self.inc
-        print(self.x_sp)
-        self.x_coord.setText(str(self.x_sp))
+        self.actualizar_datos_sp(0)
+        self.x_coord.setText(f"{self.x_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
 
     def y_neg(self):
+        # Valor en coordenadas rectangulares
         self.y_sp -= self.inc
-        print(self.y_sp)
-        self.y_coord.setText(str(self.y_sp))
+        self.actualizar_datos_sp(0)
+        self.y_coord.setText(f"{self.y_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
 
     def y_pos(self):
+        # Valor en coordenadas rectangulares
         self.y_sp += self.inc
-        print(self.y_sp)
-        self.y_coord.setText(str(self.y_sp))
+        self.actualizar_datos_sp(0)
+        self.y_coord.setText(f"{self.y_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
 
     def z_neg(self):
+        # Valor en coordenadas rectangulares
         self.z_sp -= self.inc
-        print(self.z_sp)
-        self.z_coord.setText(str(self.z_sp))
+        self.actualizar_datos_sp(0)
+        self.z_coord.setText(f"{self.z_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
 
     def z_pos(self):
+        # Valor en coordenadas rectangulares
         self.z_sp += self.inc
-        print(self.z_sp)
-        self.z_coord.setText(str(self.z_sp))
+        self.actualizar_datos_sp(0)
+        self.z_coord.setText(f"{self.z_sp:.2f}")
+        # Enviar coordenadas a ESP
+        esp.mover_motor(self.ser, 1, self.m1_rad_sp)
+        esp.mover_motor(self.ser, 2, self.m2_rad_sp)
+        esp.mover_motor(self.ser, 3, self.m3_rad_sp)
 
     def stop_cam(self):
         self.timer.stop()
@@ -1739,34 +1858,34 @@ class CMANUAL(QWidget):
     def act_mediciones(self):
         if (self.sw_coord.toggle_on == False):
             px, py, pz, err = eq.DeltaFK(q1 = self.x_val, q2 = self.y_val, q3 = self.z_val)
-            self.x_val = round(px, 4)
-            self.y_val = round(py, 4)
-            self.z_val = round(pz, 4)
+            self.x_val = px
+            self.y_val = py
+            self.z_val = pz
             # print(err)
         elif (self.sw_measure.toggle_on == True):
-            self.x_val = round(np.rad2deg(self.x_val), 2)
-            self.y_val = round(np.rad2deg(self.y_val), 2)
-            self.z_val = round(np.rad2deg(self.z_val), 2)
-        self.x_measure.setText(str(self.x_val))
-        self.y_measure.setText(str(self.y_val))
-        self.z_measure.setText(str(self.z_val))
+            self.x_val = np.rad2deg(self.x_val)
+            self.y_val = np.rad2deg(self.y_val)
+            self.z_val = np.rad2deg(self.z_val)
+        self.x_measure.setText(f"{self.x_val:.2f}")
+        self.y_measure.setText(f"{self.y_val:.2f}")
+        self.z_measure.setText(f"{self.z_val:.2f}")
 
         if (self.layout_pp.sw_measure.toggle_on == False):
-            self.pnp_val = round(self.pnp_val, 4)
+            self.pnp_val = self.pnp_val
             self.layout_pp.lbl_rad.setText("rad")
         elif (self.layout_pp.sw_measure.toggle_on == True):
-            self.pnp_val = round(np.rad2deg(self.pnp_val), 2)
+            self.pnp_val = np.rad2deg(self.pnp_val)
             self.layout_pp.lbl_rad.setText("°")
-        self.layout_pp.edit_sensor.setText(str(self.pnp_val))
-        self.layout_polea.edit_sensor.setText(str(self.chtool_val))
+        self.layout_pp.edit_sensor.setText(f"{self.pnp_val:.2f}")
+        self.layout_polea.edit_sensor.setText(f"{self.chtool_val:.2f}")
         
         if (self.layout_inventory.sw_measure.toggle_on == False):
-            self.invent_val = round(self.invent_val, 4)
+            self.invent_val = self.invent_val
             self.layout_inventory.lbl_rad.setText("rad")
         elif (self.layout_inventory.sw_measure.toggle_on == True):
-            self.invent_val = round(np.rad2deg(self.invent_val), 2)
+            self.invent_val = np.rad2deg(self.invent_val)
             self.layout_inventory.lbl_rad.setText("°")
-        self.layout_inventory.edit_sensor.setText(str(self.invent_val))
+        self.layout_inventory.edit_sensor.setText(f"{self.invent_val:.2f}")
 
     def send_msg(self):
         msg_dialog = QDialog()

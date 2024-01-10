@@ -40,8 +40,12 @@ import ESP32_serial as esp
 import chess
 
 # Dirección de imagen
-path = os.getcwd()
-img_tool = os.path.join(path, 'Interfaz/imagenes/tool_pp.png')
+#path = os.getcwd()
+path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.name == 'nt':
+    img_tool = os.path.join(path, 'imagenes\\tool_pp.png')
+else:
+    img_tool = os.path.join(path, 'imagenes/tool_pp.png')
 
 class TOOL_C(QHBoxLayout):
     # Constructor
@@ -217,7 +221,7 @@ class TOOL_C(QHBoxLayout):
         # Button 01: Activar Camara
         self.btn_camera = QPushButton("FOTOS")
         self.btn_camera.setStyleSheet(st_btn)
-        w = self.btn_camera.sizeHint().width() + 30
+        w = self.btn_camera.sizeHint().width() * 1.15
         h = self.btn_camera.sizeHint().height()
         self.btn_camera.setFixedSize(w, h)
         self.btn_camera.setCheckable(True)
@@ -235,8 +239,8 @@ class TOOL_C(QHBoxLayout):
         self.btn_camera = QPushButton(icon, "")
         self.btn_camera.setStyleSheet(st_btn)
         self.btn_camera.setIconSize(QSize(self.sw_size, self.sw_size))
-        w = self.btn_camera.sizeHint().width() + 10
-        h = self.btn_camera.sizeHint().height() + 10
+        w = self.btn_camera.sizeHint().width() * 1.05
+        h = self.btn_camera.sizeHint().height() * 1.05
         self.btn_camera.setFixedSize(w, h)
         self.btn_camera.setCheckable(True)
         self.btn_camera.clicked.connect(self.sel_active)
@@ -247,8 +251,8 @@ class TOOL_C(QHBoxLayout):
         self.btn_capture = QPushButton(icon, "")
         self.btn_capture.setStyleSheet(st_btn)
         self.btn_capture.setIconSize(QSize(self.sw_size, self.sw_size))
-        w = self.btn_capture.sizeHint().width() + 10
-        h = self.btn_capture.sizeHint().height() + 10
+        w = self.btn_capture.sizeHint().width() * 1.05
+        h = self.btn_capture.sizeHint().height() * 1.05
         self.btn_capture.setFixedSize(w, h)
         self.btn_capture.setDisabled(True)
         self.btn_capture.clicked.connect(self.sel_capture)
@@ -268,7 +272,7 @@ class TOOL_C(QHBoxLayout):
         self.spb_capture.setMaximum(100)
         self.spb_capture.setSingleStep(1)
         self.spb_capture.setStyleSheet(st_spb)
-        w = self.spb_capture.sizeHint().width() + 20
+        w = self.spb_capture.sizeHint().width() * 1.10
         h = int(0.4 * w)
         self.spb_capture.setFixedSize(w, h)
         self.spb_capture.setValue(50)
@@ -281,8 +285,8 @@ class TOOL_C(QHBoxLayout):
         self.btn_calibrar = QPushButton("Calibrar")
         self.btn_calibrar.setStyleSheet(st_calib)
         self.btn_calibrar.clicked.connect(self.sel_calibrar)
-        w = self.btn_calibrar.sizeHint().width() + 10
-        h = self.btn_calibrar.sizeHint().height() + 10
+        w = self.btn_calibrar.sizeHint().width() * 1.5
+        h = self.btn_calibrar.sizeHint().height() * 1.5
         self.btn_calibrar.setFixedSize(w, h)
         self.btn_calibrar.setDisabled(True)
         action_layout.addWidget(self.btn_calibrar, alignment = Qt.AlignCenter)
@@ -291,8 +295,8 @@ class TOOL_C(QHBoxLayout):
         self.btn_foto = QPushButton("Captura")
         self.btn_foto.setStyleSheet(st_btn)
         self.btn_foto.clicked.connect(self.calibrate_capture)
-        w = self.btn_foto.sizeHint().width() + 10
-        h = self.btn_foto.sizeHint().height() + 10
+        w = self.btn_foto.sizeHint().width() * 1.05
+        h = self.btn_foto.sizeHint().height() * 1.05
         self.btn_foto.setFixedSize(w, h)
         self.btn_foto.hide()
         action_layout.addWidget(self.btn_foto, alignment = Qt.AlignCenter)
@@ -301,8 +305,8 @@ class TOOL_C(QHBoxLayout):
         self.btn_listo = QPushButton("LISTO")
         self.btn_listo.setStyleSheet(st_btn)
         self.btn_listo.clicked.connect(self.listo)
-        w = self.btn_listo.sizeHint().width() + 10
-        h = self.btn_listo.sizeHint().height() + 10
+        w = self.btn_listo.sizeHint().width() * 1.05
+        h = self.btn_listo.sizeHint().height() * 1.05
         self.btn_listo.setFixedSize(w, h)
         self.btn_listo.hide()
         action_layout.addWidget(self.btn_listo, alignment = Qt.AlignCenter)
@@ -311,8 +315,8 @@ class TOOL_C(QHBoxLayout):
         self.btn_volver = QPushButton("Volver")
         self.btn_volver.setStyleSheet(st_calib)
         self.btn_volver.clicked.connect(self.volver)
-        w = self.btn_volver.sizeHint().width() + 10
-        h = self.btn_volver.sizeHint().height() + 10
+        w = self.btn_volver.sizeHint().width() * 1.05
+        h = self.btn_volver.sizeHint().height() * 1.05
         self.btn_volver.setFixedSize(w, h)
         self.btn_volver.hide()
         action_layout.addWidget(self.btn_volver, alignment = Qt.AlignCenter)
@@ -482,9 +486,9 @@ class TOOL_C(QHBoxLayout):
         self.btn_left = QPushButton(icon, "")
         self.btn_left.setStyleSheet(style)
         self.btn_left.setIconSize(QSize(self.icon_size, self.icon_size))
-        w = self.btn_left.sizeHint().width()
-        h = self.btn_left.sizeHint().height()
-        self.btn_left.setFixedSize(w + 10, h + 10)
+        w = self.btn_left.sizeHint().width() * 1.05
+        h = self.btn_left.sizeHint().height() * 1.05
+        self.btn_left.setFixedSize(w, h)
         self.btn_left.clicked.connect(self.left_photo)
         h_layout.addStretch(1)
         h_layout.addWidget(self.btn_left, alignment = Qt.AlignCenter)
@@ -495,9 +499,9 @@ class TOOL_C(QHBoxLayout):
         self.btn_right = QPushButton(icon, "")
         self.btn_right.setStyleSheet(style)
         self.btn_right.setIconSize(QSize(self.icon_size, self.icon_size))
-        w = self.btn_right.sizeHint().width()
-        h = self.btn_right.sizeHint().height()
-        self.btn_right.setFixedSize(w + 10, h + 10)
+        w = self.btn_right.sizeHint().width() * 1.05
+        h = self.btn_right.sizeHint().height() * 1.05
+        self.btn_right.setFixedSize(w, h)
         self.btn_right.clicked.connect(self.right_photo)
         h_layout.addWidget(self.btn_right, alignment = Qt.AlignCenter)
         h_layout.addStretch(1)
@@ -532,7 +536,7 @@ class TOOL_C(QHBoxLayout):
         v_layout.addWidget(h_widget, alignment = Qt.AlignCenter)
 
         msg_dialog.setLayout(v_layout)
-        w = self.photo.sizeHint().width() + 20
+        w = self.photo.sizeHint().width() * 1.10
         h = self.photo.sizeHint().height() + self.data.sizeHint().height() + self.btn_left.sizeHint().height()
         msg_dialog.setFixedSize(w, h * 1.1)
         h_widget.setFixedWidth(w - 20)

@@ -14,6 +14,7 @@ TOOL: POLEA
 """
 
 import os
+import sys
 from PyQt5.QtCore import Qt, QSize
 # import PyQt5.QtGui as pyGui
 from PyQt5.QtGui import QPixmap, QIntValidator
@@ -30,8 +31,12 @@ import qtawesome as qta
 import ESP32_serial as esp
 
 # Dirección de imagen
-path = os.getcwd()
-img_tool = os.path.join(path, 'Interfaz/imagenes/tool_ninguna.png')
+#path = os.getcwd()
+path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.name == 'nt':
+    img_tool = os.path.join(path, 'imagenes\\tool_ninguna.png')
+else:
+    img_tool = os.path.join(path, 'imagenes/tool_ninguna.png')
 
 class TOOL_N(QHBoxLayout):
     # Constructor
@@ -164,9 +169,9 @@ class TOOL_N(QHBoxLayout):
         self.btn_home = QPushButton(icon, "")
         self.btn_home.setStyleSheet(st_btn)
         self.btn_home.setIconSize(QSize(self.icon_size, self.icon_size))
-        w = self.btn_home.sizeHint().width()
-        h = self.btn_home.sizeHint().height()
-        self.btn_home.setFixedSize(w + 10, h + 10)
+        w = self.btn_home.sizeHint().width() * 1.1
+        h = self.btn_home.sizeHint().height() * 1.1
+        self.btn_home.setFixedSize(w, h)
         self.btn_home.clicked.connect(self.send_home)
         self.btn_home.pressed.connect(self.text_home)
         self.btn_home.released.connect(self.spin_off)
@@ -176,8 +181,8 @@ class TOOL_N(QHBoxLayout):
         self.lbl_sensor = QLabel("SENSOR: ")
         self.lbl_sensor.setStyleSheet(st_normal)
         self.lbl_sensor.adjustSize()
-        w = self.lbl_sensor.sizeHint().width() + 10
-        h = self.lbl_sensor.sizeHint().height() + 5
+        w = self.lbl_sensor.sizeHint().width() * 1.1
+        h = self.lbl_sensor.sizeHint().height() * 1.05
         self.lbl_sensor.setFixedSize(w, h)
         sensor_layout.addWidget(self.lbl_sensor, alignment = Qt.AlignCenter)
 
@@ -185,8 +190,8 @@ class TOOL_N(QHBoxLayout):
         self.edit_sensor = QLineEdit()
         self.edit_sensor.setStyleSheet(st_le)
         self.edit_sensor.setReadOnly(True)
-        w = self.edit_sensor.sizeHint().width() + 10
-        h = self.edit_sensor.sizeHint().height() + 5
+        w = self.edit_sensor.sizeHint().width() * 1.1
+        h = self.edit_sensor.sizeHint().height() * 1.05
         self.edit_sensor.setFixedSize(w, h)
         sensor_layout.addWidget(self.edit_sensor, alignment = Qt.AlignCenter)
 
@@ -194,8 +199,8 @@ class TOOL_N(QHBoxLayout):
         self.lbl_amplitud = QLabel("Amplitud: ")
         self.lbl_amplitud.setStyleSheet(st_normal)
         self.lbl_amplitud.adjustSize()
-        w = self.lbl_sensor.sizeHint().width() + 10
-        h = self.lbl_sensor.sizeHint().height() + 5
+        w = self.lbl_sensor.sizeHint().width() * 1.1
+        h = self.lbl_sensor.sizeHint().height() * 1.05
         self.lbl_sensor.setFixedSize(w, h)
         amplitud_layout.addWidget(self.lbl_amplitud, alignment = Qt.AlignCenter)
 
@@ -205,7 +210,7 @@ class TOOL_N(QHBoxLayout):
         self.spb_amplitud.setMaximum(100)
         self.spb_amplitud.setSingleStep(1)
         self.spb_amplitud.setStyleSheet(st_spb)
-        w = self.spb_amplitud.sizeHint().width() + 20
+        w = self.spb_amplitud.sizeHint().width() * 1.15
         h = int(0.4 * w)
         self.spb_amplitud.setFixedSize(w, h)
         self.spb_amplitud.setValue(0)
@@ -216,8 +221,8 @@ class TOOL_N(QHBoxLayout):
         self.lbl_periodo = QLabel("Periodo: ")
         self.lbl_periodo.setStyleSheet(st_normal)
         self.lbl_periodo.adjustSize()
-        w = self.lbl_periodo.sizeHint().width() + 10
-        h = self.lbl_periodo.sizeHint().height() + 5
+        w = self.lbl_periodo.sizeHint().width() * 1.1
+        h = self.lbl_periodo.sizeHint().height() * 1.05
         self.lbl_periodo.setFixedSize(w, h)
         periodo_layout.addWidget(self.lbl_periodo, alignment = Qt.AlignCenter)
 
@@ -227,15 +232,15 @@ class TOOL_N(QHBoxLayout):
         self.edit_periodo.setValidator(validator)
         self.edit_periodo.setStyleSheet(st_le)
         self.edit_periodo.setAlignment(Qt.AlignRight)
-        w = self.edit_periodo.sizeHint().width() + 10
-        h = self.edit_periodo.sizeHint().height() + 5
+        w = self.edit_periodo.sizeHint().width() * 1.1
+        h = self.edit_periodo.sizeHint().height() * 1.05
         self.edit_periodo.setFixedSize(w, h)
         periodo_layout.addWidget(self.edit_periodo, alignment = Qt.AlignCenter)
 
         # Label 04: Texto MicroSegundos
         self.lbl_us = QLabel("us")
         self.lbl_us.adjustSize()
-        w = self.lbl_us.sizeHint().width() + 50
+        w = self.lbl_us.sizeHint().width() * 5
         self.lbl_us.setFixedWidth(w)
         self.lbl_us.setStyleSheet(st_normal)
         periodo_layout.addWidget(self.lbl_us, alignment = Qt.AlignCenter)
@@ -245,9 +250,9 @@ class TOOL_N(QHBoxLayout):
         self.btn_countercw = QPushButton(icon, "")
         self.btn_countercw.setStyleSheet(st_btn)
         self.btn_countercw.setIconSize(QSize(self.sw_size, self.sw_size))
-        w = self.btn_countercw.sizeHint().width()
-        h = self.btn_countercw.sizeHint().height()
-        self.btn_countercw.setFixedSize(w + 10, h + 10)
+        w = self.btn_countercw.sizeHint().width() * 1.1
+        h = self.btn_countercw.sizeHint().height() * 1.1
+        self.btn_countercw.setFixedSize(w, h)
         self.btn_countercw.pressed.connect(self.spin_countercw)
         self.btn_countercw.released.connect(self.spin_off)
         btn_layout.addWidget(self.btn_countercw, alignment = Qt.AlignCenter)
@@ -257,15 +262,15 @@ class TOOL_N(QHBoxLayout):
         self.btn_clockwise = QPushButton(icon, "")
         self.btn_clockwise.setStyleSheet(st_btn)
         self.btn_clockwise.setIconSize(QSize(self.sw_size, self.sw_size))
-        w = self.btn_clockwise.sizeHint().width()
-        h = self.btn_clockwise.sizeHint().height()
-        self.btn_clockwise.setFixedSize(w + 10, h + 10)
+        w = self.btn_clockwise.sizeHint().width() * 1.1
+        h = self.btn_clockwise.sizeHint().height() * 1.1
+        self.btn_clockwise.setFixedSize(w, h)
         self.btn_clockwise.pressed.connect(self.spin_clockwise)
         self.btn_clockwise.released.connect(self.spin_off)
         btn_layout.addWidget(self.btn_clockwise, alignment = Qt.AlignCenter)
 
-        w = btn_widget.sizeHint().width()
-        btn_widget.setFixedWidth(w + 100)
+        w = btn_widget.sizeHint().width() * 1.5
+        btn_widget.setFixedWidth(w)
         
         action_layout.addWidget(sensor_widget, alignment = Qt.AlignCenter)
         action_layout.addWidget(amplitud_widget, alignment = Qt.AlignCenter)
