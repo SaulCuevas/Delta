@@ -13,8 +13,10 @@ const int MT6701_ADDRESS = 0x06;
 const int PCA9548A_ADDRESS = 0x70;
 
 // Pines del microcontrolador
-const int pinIN1 = 25;
-const int pinIN2 = 26;
+const int pinesIN1[7] = {32, 25, 27, 15, 4, 17, 18};
+const int pinesIN2[7] = {33, 26, 14, 2, 16, 5, 19};
+const int pinIN1 = pinesIN1[3];
+const int pinIN2 = pinesIN2[3];
 
 // Configuracion PWM ESP32
 const int PWMfreq = 1000; // 1 kHz
@@ -47,8 +49,36 @@ void setup(){
   Serial.begin(115200);
   Wire.begin();
   // Se configuran los pines de salida
-  pinMode(pinIN1, OUTPUT);
-  pinMode(pinIN2, OUTPUT);
+  pinMode(pinesIN1[0], OUTPUT);
+  pinMode(pinesIN2[0], OUTPUT);
+  pinMode(pinesIN1[1], OUTPUT);
+  pinMode(pinesIN2[1], OUTPUT);
+  pinMode(pinesIN1[2], OUTPUT);
+  pinMode(pinesIN2[2], OUTPUT);
+  pinMode(pinesIN1[3], OUTPUT);
+  pinMode(pinesIN2[3], OUTPUT);
+  pinMode(pinesIN1[4], OUTPUT);
+  pinMode(pinesIN2[4], OUTPUT);
+  pinMode(pinesIN1[5], OUTPUT);
+  pinMode(pinesIN2[5], OUTPUT);
+  pinMode(pinesIN1[6], OUTPUT);
+  pinMode(pinesIN2[6], OUTPUT);
+
+  digitalWrite(pinesIN1[0], LOW);
+  digitalWrite(pinesIN1[1], LOW);
+  digitalWrite(pinesIN1[2], LOW);
+  digitalWrite(pinesIN1[3], LOW);
+  digitalWrite(pinesIN1[4], LOW);
+  digitalWrite(pinesIN1[5], LOW);
+  digitalWrite(pinesIN1[6], LOW);
+  digitalWrite(pinesIN2[0], LOW);
+  digitalWrite(pinesIN2[1], LOW);
+  digitalWrite(pinesIN2[2], LOW);
+  digitalWrite(pinesIN2[3], LOW);
+  digitalWrite(pinesIN2[4], LOW);
+  digitalWrite(pinesIN2[5], LOW);
+  digitalWrite(pinesIN2[6], LOW);
+
 
   // Se configuran los canales PWM para la ESP32
   ledcSetup(PWMChannelIN1_0, PWMfreq, PWMResolution);
@@ -57,7 +87,7 @@ void setup(){
   ledcAttachPin(pinIN1, PWMChannelIN1_0);
   ledcAttachPin(pinIN2, PWMChannelIN2_0);
   
-  PCA9548A_cambio_direccion(1, 1);
+  PCA9548A_cambio_direccion(3, 1);
   lastTime = millis();
 }
 

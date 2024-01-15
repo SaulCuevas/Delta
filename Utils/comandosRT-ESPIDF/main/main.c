@@ -113,6 +113,7 @@ COMANDOS DISPONIBLES:
 #define TIMEOUT_MS 1
 
 bool i2c_not_present[7] = {false, false, false, false, false, false, false};
+bool i2c_not_present_1[7] = {false, false, false, false, false, false, false};
 
 // Tiempo de muestreo
 // TimerHandle_t xTimer;      // Timer para el Loop de Control
@@ -182,18 +183,23 @@ float angulo_real_1[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 int offset[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 float PWMvalue[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 // const float zeros[3] = {3.433816, 4.421700, 2.899991};
-const float zeros[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+const float zeros[6] = {3.433049, 4.424001, 2.911879, 0.0, 0.0, 0.4238};
 float amplitud = 0.0;
 float periodo = 0.0;
 bool flag_mostrar_valores_PID = false;
 bool flag_HOME_realizado = false;
+bool flag_M123_again = false;
 bool flag_control_M1 = false;
+bool flag_control_M1_pos = true;
 bool flag_control_M2 = false;
+bool flag_control_M2_pos = true;
 bool flag_control_M3 = false;
+bool flag_control_M3_pos = true;
 bool flag_lims = false;
 bool flag_control_M4 = false;
 bool flag_control_M5 = false;
 bool flag_control_M6 = false;
+bool flag_HOMING = false;
 bool flag_control_manual = false;
 bool flag_control_manual_M1 = false;
 bool flag_control_manual_M2 = false;
@@ -201,28 +207,36 @@ bool flag_control_manual_M3 = false;
 bool flag_control_manual_M4 = false;
 bool flag_control_manual_M5 = false;
 bool flag_control_manual_M6 = false;
+bool flag_control_manual_M7 = false;
 bool flag_brazo = false;
 bool busy = false;
 bool lastbusy = false;
+uint8_t cont_M123_again = 0;
 
 // Memoria de error
 #define errs_num 10
 float err_mem_0[errs_num] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 float err_mem_1[errs_num] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 float err_mem_2[errs_num] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+float err_mem_3[errs_num] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+float err_mem_4[errs_num] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+float err_mem_5[errs_num] = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 float err_mem_0t = 1.0;
 float err_mem_1t = 1.0;
 float err_mem_2t = 1.0;
+float err_mem_3t = 1.0;
+float err_mem_4t = 1.0;
+float err_mem_5t = 1.0;
 
 // Homing y herramienta
 float pos_home_herr = 0.0;
 const float vel_alta = 20.0;
-const float vel_baja = 15.0;
+const float vel_baja = 10.0;
 const float max_pos_herr = 100.0;
 const float min_pos_herr = -100.0;
-float pos_herramienta_0 = -5.85;
-float pos_herramienta_1 = -11.7;
-float pos_herramienta_2 = 0.0;
+float pos_herramienta_0 = -5.83;
+float pos_herramienta_1 = -9.66;
+float pos_herramienta_2 = 0;
 bool hit_limit = false;
 
 // Parametros del PID
@@ -236,12 +250,12 @@ const float error_min = 0.001;
 // const float Ki_arriba[3] = {16.0,        12.0,   12.0};
 // const float Kd_arriba[3] = {5.8681,    2.5351,    1.2905};
 
-float Kp[6] = {55.3068,  54.9594,   54.1958,   553.0961,   865.5567,   865.5567};
-float Ki[6] = {12.0,       12.0,        12.0,        2258.7612,  0.0,        0.0};
-float Kd[6] = {1.6972,    1.9189,     1.7756,     1.4123,     57.3356,    57.3356};
+float Kp[6] = {55.3068/3, 54.9594/3,    54.1958/3,    94.6384,    865.5567,   865.5567};
+float Ki[6] = {12.0/2,    12.0/2,       12.0/2,       5.0,        0.0,        0.0};
+float Kd[6] = {1.6972/2,  1.9189/2,     1.7756/2,     10.1249,    57.3356,    57.3356};
 
 float Kp_arriba[3] = {171.6186,   98.6761,   85.2917};
-float Ki_arriba[3] = {16.0,        12.0,   12.0};
+float Ki_arriba[3] = {25.0,        20.0,   20.0};
 float Kd_arriba[3] = {5.8681,    2.5351,    1.2905};
 
 // Variables del PID
@@ -301,75 +315,118 @@ void app_main(void)
     }
     while (1)
     {
+        esp_err_t PCA_present = ESP_OK;
         lastTime2 = esp_timer_get_time();
         hit_limit = gpio_get_level(pinLIMIT_SW);
 
-        PCA9548A_cambio_direccion(0, 1);
+        PCA_present = PCA9548A_cambio_direccion(0, 1);
         angulo_1[0] = angulo[0];
-        angulo[0] = leerMT6701(0);
-        if ((angulo[0] > (MAX_POS * 0.9)) & (angulo_1[0] < (MAX_POS * 0.1)))
-            offset[0]--;
-        if ((angulo[0] < (MAX_POS * 0.1)) & (angulo_1[0] > (MAX_POS * 0.9)))
-            offset[0]++;
+        i2c_not_present_1[0] = i2c_not_present[0];
+        if (PCA_present == ESP_OK)
+        {
+            angulo[0] = leerMT6701(0);
+        }
+        if (!i2c_not_present_1[0] & !i2c_not_present[0])
+        {
+            if ((angulo[0] > (MAX_POS * 0.9)) & (angulo_1[0] < (MAX_POS * 0.1)))
+                offset[0]--;
+            if ((angulo[0] < (MAX_POS * 0.1)) & (angulo_1[0] > (MAX_POS * 0.9)))
+                offset[0]++;
+        }
         angulo_real_1[0] = angulo_real[0];
         angulo_real[0] = angulo[0] + offset[0] * MAX_POS - zeros[0];
 
-        PCA9548A_cambio_direccion(1, 1);
+        PCA_present = PCA9548A_cambio_direccion(1, 1);
         angulo_1[1] = angulo[1];
-        angulo[1] = leerMT6701(1);
-        if ((angulo[1] > (MAX_POS * 0.9)) & (angulo_1[1] < (MAX_POS * 0.1)))
-            offset[1]--;
-        if ((angulo[1] < (MAX_POS * 0.1)) & (angulo_1[1] > (MAX_POS * 0.9)))
-            offset[1]++;
+        i2c_not_present_1[1] = i2c_not_present[1];
+        if (PCA_present == ESP_OK)
+        {
+            angulo[1] = leerMT6701(1);
+        }
+        if (!i2c_not_present_1[1] & !i2c_not_present[1])
+        {
+            if ((angulo[1] > (MAX_POS * 0.9)) & (angulo_1[1] < (MAX_POS * 0.1)))
+                offset[1]--;
+            if ((angulo[1] < (MAX_POS * 0.1)) & (angulo_1[1] > (MAX_POS * 0.9)))
+                offset[1]++;
+        }
         angulo_real_1[1] = angulo_real[1];
         angulo_real[1] = angulo[1] + offset[1] * MAX_POS - zeros[1];
 
-        PCA9548A_cambio_direccion(2, 1);
+        PCA_present = PCA9548A_cambio_direccion(2, 1);
         angulo_1[2] = angulo[2];
-        angulo[2] = leerMT6701(2);
-        if ((angulo[2] > (MAX_POS * 0.9)) & (angulo_1[2] < (MAX_POS * 0.1)))
-            offset[2]--;
-        if ((angulo[2] < (MAX_POS * 0.1)) & (angulo_1[2] > (MAX_POS * 0.9)))
-            offset[2]++;
+        i2c_not_present_1[2] = i2c_not_present[2];
+        if (PCA_present == ESP_OK)
+        {
+            angulo[2] = leerMT6701(2);
+        }
+        if (!i2c_not_present_1[2] & !i2c_not_present[2])
+        {
+            if ((angulo[2] > (MAX_POS * 0.9)) & (angulo_1[2] < (MAX_POS * 0.1)))
+                offset[2]--;
+            if ((angulo[2] < (MAX_POS * 0.1)) & (angulo_1[2] > (MAX_POS * 0.9)))
+                offset[2]++;
+        }
         angulo_real_1[2] = angulo_real[2];
         angulo_real[2] = angulo[2] + offset[2] * MAX_POS - zeros[2];
 
-        if ((angulo_real[0] > lim_pos) | (angulo_real[1] > lim_pos) | (angulo_real[2] > lim_pos) | (angulo_real[0] < lim_neg) | (angulo_real[1] < lim_neg) | (angulo_real[2] < lim_neg))
-        {
-            flag_lims = true;
-        }
-        else
-        {
-            flag_lims = false;
-        }
+        // if ((angulo_real[0] > lim_pos) | (angulo_real[1] > lim_pos) | (angulo_real[2] > lim_pos) | (angulo_real[0] < lim_neg) | (angulo_real[1] < lim_neg) | (angulo_real[2] < lim_neg))
+        // {
+        //     flag_lims = true;
+        // }
+        // else
+        // {
+        //     flag_lims = false;
+        // }
 
-        PCA9548A_cambio_direccion(3, 1);
+        PCA_present = PCA9548A_cambio_direccion(3, 1);
         angulo_1[3] = angulo[3];
-        // angulo[3] = leerMT6701(3);
-        if ((angulo[3] > (MAX_POS * 0.9)) & (angulo_1[3] < (MAX_POS * 0.1)))
-            offset[3]--;
-        if ((angulo[3] < (MAX_POS * 0.1)) & (angulo_1[3] > (MAX_POS * 0.9)))
-            offset[3]++;
+        i2c_not_present_1[3] = i2c_not_present[3];
+        if (PCA_present == ESP_OK)
+        {
+            angulo[3] = leerMT6701(3);
+        }
+        if (!i2c_not_present_1[3] & !i2c_not_present[3])
+        {
+            if ((angulo[3] > (MAX_POS * 0.9)) & (angulo_1[3] < (MAX_POS * 0.1)))
+                offset[3]--;
+            if ((angulo[3] < (MAX_POS * 0.1)) & (angulo_1[3] > (MAX_POS * 0.9)))
+                offset[3]++;
+        }
         angulo_real_1[3] = angulo_real[3];
         angulo_real[3] = angulo[3] + offset[3] * MAX_POS - zeros[3];
 
-        PCA9548A_cambio_direccion(4, 1);
+        PCA_present = PCA9548A_cambio_direccion(4, 1);
         angulo_1[4] = angulo[4];
-        // angulo[4] = leerMT6701(4);
-        if ((angulo[4] > (MAX_POS * 0.9)) & (angulo_1[4] < (MAX_POS * 0.1)))
-            offset[4]--;
-        if ((angulo[4] < (MAX_POS * 0.1)) & (angulo_1[4] > (MAX_POS * 0.9)))
-            offset[4]++;
+        i2c_not_present_1[4] = i2c_not_present[4];
+        if (PCA_present == ESP_OK)
+        {
+            angulo[4] = leerMT6701(4);
+        }
+        if (!i2c_not_present_1[4] & !i2c_not_present[4])
+        {
+            if ((angulo[4] > (MAX_POS * 0.9)) & (angulo_1[4] < (MAX_POS * 0.1)))
+                offset[4]--;
+            if ((angulo[4] < (MAX_POS * 0.1)) & (angulo_1[4] > (MAX_POS * 0.9)))
+                offset[4]++;
+        }
         angulo_real_1[4] = angulo_real[4];
         angulo_real[4] = angulo[4] + offset[4] * MAX_POS - zeros[4];
 
-        PCA9548A_cambio_direccion(5, 1);
+        PCA_present = PCA9548A_cambio_direccion(5, 1);
         angulo_1[5] = angulo[5];
-        angulo[5] = leerMT6701(5);
-        if ((angulo[5] > (MAX_POS * 0.9)) & (angulo_1[5] < (MAX_POS * 0.1)))
-            offset[5]--;
-        if ((angulo[5] < (MAX_POS * 0.1)) & (angulo_1[5] > (MAX_POS * 0.9)))
-            offset[5]++;
+        i2c_not_present_1[5] = i2c_not_present[5];
+        if (PCA_present == ESP_OK)
+        {
+            angulo[5] = leerMT6701(5);
+        }
+        if (!i2c_not_present_1[5] & !i2c_not_present[5])
+        {
+            if ((angulo[5] > (MAX_POS * 0.9)) & (angulo_1[5] < (MAX_POS * 0.1)))
+                offset[5]--;
+            if ((angulo[5] < (MAX_POS * 0.1)) & (angulo_1[5] > (MAX_POS * 0.9)))
+                offset[5]++;
+        }
         angulo_real_1[5] = angulo_real[5];
         angulo_real[5] = angulo[5] + offset[5] * MAX_POS - zeros[5];
 
@@ -411,7 +468,19 @@ void vTaskControlLoop(void *pvParameters)
         if (esp_timer_get_time() - lastTime >= sampleTime)
         {
             lastbusy = busy;
-            if (flag_control_M1 | flag_control_M2 | flag_control_M3 | flag_control_M4 | flag_control_M5 | flag_control_M6)
+            if (flag_M123_again & !flag_control_M1 & !flag_control_M2 & !flag_control_M3)
+            {
+                flag_control_M1 = true;
+                flag_control_M2 = true;
+                flag_control_M3 = true;
+                cont_M123_again++;
+                if ( cont_M123_again >= 5 )
+                {
+                    flag_M123_again = false;
+                    cont_M123_again = 0;
+                }
+            }
+            if (flag_M123_again | flag_control_M1 | flag_control_M2 | flag_control_M3 | flag_control_M4 | flag_control_M5 | flag_control_M6)
             {
                 busy = true;
             }
@@ -435,7 +504,11 @@ void vTaskControlLoop(void *pvParameters)
             // }
 
             // Control de los motores delta
-            if (flag_control_manual_M1)
+            if(flag_HOMING)
+            {
+                ;
+            }
+            else if (flag_control_manual_M1)
             {
                 busy = true;
                 gen_pulso(0, amplitud, periodo, PWMChannelIN1_0, PWMChannelIN2_0); // Amplitud en % y periodo en us
@@ -466,9 +539,9 @@ void vTaskControlLoop(void *pvParameters)
                     if (fabsf(err_mem_0t / errs_num) < error_min)
                     {
                         PWMvalue[0] = 0.0;
+                        // printf("listo M1\n");
                         setMotor(0, 0.0, PWMChannelIN1_0, PWMChannelIN2_0);
                         flag_control_M1 = false;
-                        printf("listo M1\n");
                     }
                     else
                     {
@@ -482,7 +555,11 @@ void vTaskControlLoop(void *pvParameters)
                 error[0] = qds[0] - angulo_real[0];
             }
             // Motor Delta 2
-            if (flag_control_manual_M2)
+            if(flag_HOMING)
+            {
+                ;
+            }
+            else if (flag_control_manual_M2)
             {
                 busy = true;
                 gen_pulso(1, amplitud, periodo, PWMChannelIN1_1, PWMChannelIN2_1); // Amplitud en % y periodo en us
@@ -513,9 +590,9 @@ void vTaskControlLoop(void *pvParameters)
                     if (fabsf(err_mem_1t / errs_num) < error_min)
                     {
                         PWMvalue[1] = 0.0;
+                        // printf("listo M2\n");
                         setMotor(1, 0.0, PWMChannelIN1_1, PWMChannelIN2_1);
                         flag_control_M2 = false;
-                        printf("listo M2\n");
                     }
                     else
                     {
@@ -529,7 +606,11 @@ void vTaskControlLoop(void *pvParameters)
                 error[1] = qds[1] - angulo_real[1];
             }
             // Motor Delta 3
-            if (flag_control_manual_M3)
+            if(flag_HOMING)
+            {
+                ;
+            }
+            else if (flag_control_manual_M3)
             {
                 busy = true;
                 gen_pulso(2, amplitud, periodo, PWMChannelIN1_2, PWMChannelIN2_2); // Amplitud en % y periodo en us
@@ -560,9 +641,9 @@ void vTaskControlLoop(void *pvParameters)
                     if (fabsf(err_mem_2t / errs_num) < error_min)
                     {
                         PWMvalue[2] = 0.0;
+                        // printf("listo M3\n");
                         setMotor(2, 0.0, PWMChannelIN1_2, PWMChannelIN2_2);
                         flag_control_M3 = false;
-                        printf("listo M3\n");
                     }
                     else
                     {
@@ -588,7 +669,31 @@ void vTaskControlLoop(void *pvParameters)
                 else
                 {
                     PWMvalue[3] = calcularPID(3, qds[3], angulo_real[3]);
-                    setMotor(3, PWMvalue[3], PWMChannelIN1_3, PWMChannelIN2_3);
+                    err_mem_3[0] = err_mem_3[1];
+                    err_mem_3[1] = err_mem_3[2];
+                    err_mem_3[2] = err_mem_3[3];
+                    err_mem_3[3] = err_mem_3[4];
+                    err_mem_3[4] = err_mem_3[5];
+                    err_mem_3[5] = err_mem_3[6];
+                    err_mem_3[6] = err_mem_3[7];
+                    err_mem_3[7] = err_mem_3[8];
+                    err_mem_3[8] = err_mem_3[9];
+                    err_mem_3[9] = error[3];
+                    err_mem_3t = 0;
+                    for (size_t i = 0; i < errs_num; i++)
+                        err_mem_3t = fabsf(err_mem_3t) + fabsf(err_mem_3[i]);
+
+                    if (fabsf(err_mem_3t / errs_num) < error_min)
+                    {
+                        PWMvalue[3] = 0.0;
+                        printf("listo M4\n");
+                        setMotor(3, 0.0, PWMChannelIN1_3, PWMChannelIN2_3);
+                        flag_control_M4 = false;
+                    }
+                    else
+                    {
+                        setMotor(3, PWMvalue[3], PWMChannelIN1_3, PWMChannelIN2_3);
+                    }
                 }
             }
             else
@@ -597,7 +702,11 @@ void vTaskControlLoop(void *pvParameters)
                 error[3] = qds[3] - angulo_real[3];
             }
             // Motor Cambio de Herramienta
-            if (flag_control_manual_M5)
+            if(flag_HOMING)
+            {
+                ;
+            }
+            else if (flag_control_manual_M5)
             {
                 busy = true;
                 gen_pulso(4, amplitud, periodo, PWMChannelIN1_4, PWMChannelIN2_4); // Amplitud en % y periodo en us
@@ -608,19 +717,36 @@ void vTaskControlLoop(void *pvParameters)
                     setMotor(4, 0.0, PWMChannelIN1_4, PWMChannelIN2_4);
                 else
                 {
-                    PWMvalue[4] = calcularPID(4, qds[4], angulo_real[4]);
-                    if ((hit_limit == false) & (PWMvalue[4] > 0))
+                    PWMvalue[4] = calcularPID(4, qds[4], angulo_real[4])*-1;
+                    err_mem_4[0] = err_mem_4[1];
+                    err_mem_4[1] = err_mem_4[2];
+                    err_mem_4[2] = err_mem_4[3];
+                    err_mem_4[3] = err_mem_4[4];
+                    err_mem_4[4] = err_mem_4[5];
+                    err_mem_4[5] = err_mem_4[6];
+                    err_mem_4[6] = err_mem_4[7];
+                    err_mem_4[7] = err_mem_4[8];
+                    err_mem_4[8] = err_mem_4[9];
+                    err_mem_4[9] = error[4];
+                    err_mem_4t = 0;
+                    for (size_t i = 0; i < errs_num; i++)
+                        err_mem_4t = fabsf(err_mem_4t) + fabsf(err_mem_4[i]);
+
+                    if ((hit_limit == false) & (PWMvalue[4] < 0))
                     {
                         setMotor(4, 0.0, PWMChannelIN1_4, PWMChannelIN2_4);
                         flag_control_M5 = false;
                     }
-                    else
-                        setMotor(4, PWMvalue[4], PWMChannelIN1_4, PWMChannelIN2_4);
-                    if (fabsf(error[4]) < error_min)
+                    else if (fabsf(err_mem_4t / errs_num) < error_min)
                     {
                         PWMvalue[4] = 0.0;
+                        printf("listo M5\n");
                         setMotor(4, 0.0, PWMChannelIN1_4, PWMChannelIN2_4);
                         flag_control_M5 = false;
+                    }
+                    else
+                    {
+                        setMotor(4, PWMvalue[4], PWMChannelIN1_4, PWMChannelIN2_4);
                     }
                 }
             }
@@ -642,12 +768,30 @@ void vTaskControlLoop(void *pvParameters)
                 else
                 {
                     PWMvalue[5] = calcularPID(5, qds[5], angulo_real[5]);
-                    setMotor(5, PWMvalue[5], PWMChannelIN1_5, PWMChannelIN2_5);
-                    if (fabsf(error[5]) < error_min)
+                    err_mem_5[0] = err_mem_5[1];
+                    err_mem_5[1] = err_mem_5[2];
+                    err_mem_5[2] = err_mem_5[3];
+                    err_mem_5[3] = err_mem_5[4];
+                    err_mem_5[4] = err_mem_5[5];
+                    err_mem_5[5] = err_mem_5[6];
+                    err_mem_5[6] = err_mem_5[7];
+                    err_mem_5[7] = err_mem_5[8];
+                    err_mem_5[8] = err_mem_5[9];
+                    err_mem_5[9] = error[5];
+                    err_mem_5t = 0;
+                    for (size_t i = 0; i < errs_num; i++)
+                        err_mem_5t = fabsf(err_mem_5t) + fabsf(err_mem_5[i]);
+
+                    if (fabsf(err_mem_5t / errs_num) < error_min)
                     {
                         PWMvalue[5] = 0.0;
+                        printf("listo M6\n");
                         setMotor(5, 0.0, PWMChannelIN1_5, PWMChannelIN2_5);
                         flag_control_M6 = false;
+                    }
+                    else 
+                    {
+                        setMotor(5, PWMvalue[5], PWMChannelIN1_5, PWMChannelIN2_5);
                     }
                 }
             }
@@ -655,6 +799,16 @@ void vTaskControlLoop(void *pvParameters)
             {
                 setMotor(5, 0.0, PWMChannelIN1_5, PWMChannelIN2_5);
                 error[5] = qds[5] - angulo_real[5];
+            }
+
+            if (flag_control_manual_M7)
+            {
+                float offset_guardado = offset[0];
+                float pos_guardado = angulo_real[0];
+                busy = true;
+                gen_pulso(6, amplitud, periodo, PWMChannelIN1_6, PWMChannelIN2_6); // Amplitud en % y periodo en us
+                angulo_real[0] = pos_guardado;
+                offset[0] = offset_guardado;
             }
 
             lastTime = esp_timer_get_time();
@@ -775,6 +929,7 @@ static void uart_task(void *pvParameters)
 void descifrar_comando(uint8_t *data)
 {
     data[strcspn((char *)data, "\n")] = 0;   // Se borra la nueva linea de la string
+    printf("echo:%s\n", (char *)data);
     char *token = strtok((char *)data, " "); // Se extrae el primer valor de la string: COMM1+COMM2 ARG1 ARG2 ARG3 ARG4 ARG5 ARG6 ARG7 ARG8 ARG9
     char comm1 = token[0];
     int comm2 = atoi(token + 1);
@@ -797,6 +952,7 @@ void descifrar_comando(uint8_t *data)
         switch (comm2)
         {
         case 123:
+            flag_M123_again = true;
             flag_control_M1 = true;
             flag_control_M2 = true;
             flag_control_M3 = true;
@@ -877,8 +1033,11 @@ void descifrar_comando(uint8_t *data)
         case 5:
             amplitud = args[0];
             periodo = args[1];
-            if ((hit_limit == false) & (amplitud > 0))
+            if ((hit_limit == false) & (amplitud < 0))
+            {
                 flag_control_manual_M5 = false;
+                printf("HIT LIMIT\n");
+            }
             else
             {
                 flag_control_manual_M5 = true;
@@ -889,6 +1048,11 @@ void descifrar_comando(uint8_t *data)
             amplitud = args[0];
             periodo = args[1];
             break;
+        case 7:
+            flag_control_manual_M7 = true;
+            amplitud = args[0];
+            periodo = args[1];
+            break;
         default:
             printf("No existe ese motor\n");
             break;
@@ -896,11 +1060,9 @@ void descifrar_comando(uint8_t *data)
         break;
     // Mandar un pulso para dispensar soldadura
     case 'S':
-        busy = true;
+        flag_control_manual_M7 = true;
         amplitud = args[0];
         periodo = args[1];
-        gen_pulso(6, amplitud, periodo, PWMChannelIN1_6, PWMChannelIN2_6); // Amplitud en % y periodo en us
-        busy = false;
         break;
     // Leer todos los encoders del robot delta
     // Ej: E
@@ -981,6 +1143,9 @@ void descifrar_comando(uint8_t *data)
         else
             flag_mostrar_valores_PID = false;
         break;
+    case 'R':
+        esp_restart();
+        break;
     // STOP
     case '-':
         busy = true;
@@ -1004,6 +1169,7 @@ void descifrar_comando(uint8_t *data)
         flag_control_M4 = false;
         flag_control_M5 = false;
         flag_control_M6 = false;
+        flag_M123_again = false;
         busy = false;
         break;
     case 'B':
@@ -1088,30 +1254,34 @@ float leerMT6701(uint8_t motor)
     case ESP_OK:
         concat = ((rx_data[0] << 6) | (rx_data[1] >> 2));
         i2c_not_present[motor] = false;
+        return ((float)concat * MAX_POS) / 16384.0;
         break;
     case ESP_FAIL:
         i2c_not_present[motor] = true;
-        printf("ESP_FAIL: Sending command error, slave hasn't ACK the transfer\n");
+        return angulo[motor];
+        // printf("ESP_FAIL: Sending command error, slave hasn't ACK the transfer\n");
         break;
     case ESP_ERR_TIMEOUT:
         i2c_not_present[motor] = true;
-        printf("ESP_ERR_TIMEOUT: Operation timeout because the bus is busy\n");
+        // printf("ESP_ERR_TIMEOUT: Operation timeout because the bus is busy\n");
+        return angulo[motor];
         break;
     case ESP_ERR_INVALID_STATE:
         i2c_not_present[motor] = true;
-        printf("ESP_ERR_INVALID_STATE: I2C driver not installed or not in master mode\n");
+        // printf("ESP_ERR_INVALID_STATE: I2C driver not installed or not in master mode\n");
+        return angulo[motor];
         break;
     case ESP_ERR_INVALID_ARG:
         i2c_not_present[motor] = true;
-        printf("ESP_ERR_INVALID_ARG: Parameter error\n");
+        // printf("ESP_ERR_INVALID_ARG: Parameter error\n");
+        return angulo[motor];
         break;
     default:
         i2c_not_present[motor] = true;
-        printf("ESP_FAIL: Sending command error, slave hasn't ACK the transfer\n");
+        // printf("ESP_FAIL: Sending command error, slave hasn't ACK the transfer\n");
+        return angulo[motor];
         break;
     }
-
-    return ((float)concat * MAX_POS) / 16384.0;
 }
 
 // Calcular PID
@@ -1207,31 +1377,35 @@ void setMotor(int motor, float valPWM, int IN1, int IN2)
 // Homing para la herramienta
 void HOME(void)
 {
+    flag_HOMING = true;
     bool switch_herramienta = true;                         // Se declara variable para leer el limit switch
-    setMotor(4, vel_alta, PWMChannelIN1_4, PWMChannelIN2_4); // Se inicializa el motor en velocidad alta en direccion al limit switch (verificar direccion si no cambiar todas las vels por -1)
+    setMotor(4, -vel_alta*4, PWMChannelIN1_4, PWMChannelIN2_4); // Se inicializa el motor en velocidad alta en direccion al limit switch (verificar direccion si no cambiar todas las vels por -1)
     switch_herramienta = gpio_get_level(pinLIMIT_SW);
     while (switch_herramienta == true)
         switch_herramienta = gpio_get_level(pinLIMIT_SW); // Esperar a leer un positivo (o negativo) en el limit switch
     setMotor(4, 0.0, PWMChannelIN1_4, PWMChannelIN2_4);    // Detener el motor
     vTaskDelay(pdMS_TO_TICKS(100));
-    setMotor(4, -vel_baja, PWMChannelIN1_4, PWMChannelIN2_4); // Girar en sentido contrario dos segundos
+    setMotor(4, vel_baja, PWMChannelIN1_4, PWMChannelIN2_4); // Girar en sentido contrario dos segundos
     vTaskDelay(pdMS_TO_TICKS(1000));
-    setMotor(4, vel_baja, PWMChannelIN1_4, PWMChannelIN2_4); // Girar en sentido al limit switch en velocidad baja
+    setMotor(4, -vel_baja, PWMChannelIN1_4, PWMChannelIN2_4); // Girar en sentido al limit switch en velocidad baja
     switch_herramienta = gpio_get_level(pinLIMIT_SW);
     while (switch_herramienta == true)
         switch_herramienta = gpio_get_level(pinLIMIT_SW); // Esperar a leer un positivo (o negativo) en el limit switch
     setMotor(4, 0.0, PWMChannelIN1_4, PWMChannelIN2_4);    // Detener el motor
-    PCA9548A_cambio_direccion(4, 1);                      // Dirigir el multiplexor I2C al encoder 5
-    pos_home_herr = leerMT6701(4);                        // Guardar la lectura del encoder
-    angulo_real[4] = pos_home_herr;
+    // PCA9548A_cambio_direccion(4, 1);                      // Dirigir el multiplexor I2C al encoder 5
+    // pos_home_herr = leerMT6701(4);                        // Guardar la lectura del encoder
+    // angulo_real[4] = pos_home_herr;
     offset[4] = 0;
     flag_HOME_realizado = true;
-    printf("%f\n", pos_home_herr);
+    printf("%f\n", angulo[4]);
+    flag_HOMING = false;
+    pos_home_herr = angulo[4];
 }
 
 // Homing para la herramienta
 void HOME_BRAZO(int motor)
 {
+    flag_HOMING = true;
     bool switch_herramienta = true;                       // Se declara variable para leer el limit switch
 
     switch (motor)
@@ -1285,18 +1459,18 @@ void HOME_BRAZO(int motor)
         break;
     }
 
-    vTaskDelay(pdMS_TO_TICKS(2000));
+    vTaskDelay(pdMS_TO_TICKS(500));
 
     switch (motor)
     {
     case 0:
-        setMotor(0, vel_baja, PWMChannelIN1_0, PWMChannelIN2_0); // Girar en sentido al limit switch en velocidad baja
+        setMotor(0, 5, PWMChannelIN1_0, PWMChannelIN2_0); // Girar en sentido al limit switch en velocidad baja
         break;
     case 1:
-        setMotor(1, vel_baja, PWMChannelIN1_1, PWMChannelIN2_1); // Girar en sentido al limit switch en velocidad baja
+        setMotor(1, 5, PWMChannelIN1_1, PWMChannelIN2_1); // Girar en sentido al limit switch en velocidad baja
         break;
     case 2:
-        setMotor(2, vel_baja, PWMChannelIN1_2, PWMChannelIN2_2); // Girar en sentido al limit switch en velocidad baja
+        setMotor(2, 5, PWMChannelIN1_2, PWMChannelIN2_2); // Girar en sentido al limit switch en velocidad baja
         break;
     default:
         break;
@@ -1323,12 +1497,14 @@ void HOME_BRAZO(int motor)
 
     offset[motor] = 0;
     printf("%f\n", angulo_real[motor]);
+    flag_HOMING = false;
 }
 
 // Generador de pulso
 void gen_pulso(int motor, float amp, float ancho, int IN1, int IN2)
 { // Amplitud en % y periodo en us
     setMotor(motor, amp, IN1, IN2);
+    // printf("%f\n", angulo_real[0]);
     vTaskDelay(pdMS_TO_TICKS(fabsf(ancho) / 1000));
     setMotor(motor, 0.0, IN1, IN2);
     flag_control_manual_M1 = false;
@@ -1337,6 +1513,7 @@ void gen_pulso(int motor, float amp, float ancho, int IN1, int IN2)
     flag_control_manual_M4 = false;
     flag_control_manual_M5 = false;
     flag_control_manual_M6 = false;
+    flag_control_manual_M7 = false;
 }
 
 float map(float x, float in_min, float in_max, float out_min, float out_max)

@@ -1,7 +1,7 @@
 {
     "version":            "1",
     "project_name":       "comandosRT-ESPIDF",
-    "project_version":    "a6e3fde-dirty",
+    "project_version":    "da64c67-dirty",
     "project_path":       "C:/Users/saulc/GitHub/Delta/Utils/comandosRT-ESPIDF",
     "idf_path":           "C:/Users/saulc/esp/esp-idf",
     "build_dir":          "C:/Users/saulc/GitHub/Delta/Utils/comandosRT-ESPIDF/build",

@@ -2,29 +2,40 @@ import sys
 
 sys.path.append("../Delta")
 
-from VisionArtificial import SVA_PCB
+from VisionArtificial import SVA_PCB, interprete_gerber
 from Control import Trayectorias
 import time
 from matplotlib import pyplot as plt
 
-from tkinter.filedialog import askdirectory, askopenfilename
+# from tkinter.filedialog import askdirectory, askopenfilename
 
-path = askdirectory(title='Selecciona la carpeta CAM')
+# path = askdirectory(title='Selecciona la carpeta CAM')
+# map_path = askopenfilename(title='Selecciona la imagen a comparar', filetypes=[("Imágenes", ".jpg .png")])
+
+path = "tests/Triple oscilador a LEDs v10"
+map_path = "tests/Imagenes/FOTO_20240112_130010.png"
+
 top_bottom = input('¿Es top layer? (Y/N) ')
 
-if top_bottom == 'Y' or top_bottom == 'y':
-    _top_bottom = True
-elif top_bottom == 'N' or top_bottom == 'n':
-    _top_bottom = False
-else:
-    print('...')
-    exit()
+# if top_bottom == 'Y' or top_bottom == 'y':
+#     _top_bottom = True
+# elif top_bottom == 'N' or top_bottom == 'n':
+#     _top_bottom = False
+# else:
+#     print('...')
+#     exit()
 
-map_path = askopenfilename(title='Selecciona la imagen a comparar', filetypes=[("Imágenes", ".jpg .png")])
+_top_bottom = True
 
 start_time = time.time()
 
-puntos = SVA_PCB.inicioSVA(path, map_path, _top_bottom)
+path_r1 = "C:/Users/saulc/Downloads/IMG_20240110_222245.jpg"
+path_r2 = "C:/Users/saulc/Downloads/IMG_20240110_222245.jpg"
+path_r3 = "C:/Users/saulc/Downloads/IMG_20240110_222245.jpg"
+path_r4 = "C:/Users/saulc/Downloads/IMG_20240110_222245.jpg"
+
+componentes_lista = interprete_gerber.obtener_pnp(path, _top_bottom)
+puntos = SVA_PCB.inicioSVA(path, map_path, _top_bottom, componentes_lista, path_r1, path_r2, path_r3, path_r4)
 
 ts, qds, dqds, d2qds, pds, dpds, d2pds, err = Trayectorias.calc_trayectorias_ps_no_t(func=Trayectorias.bezier_no_t, operaciones=puntos[:,0], Ps=puntos[:,1:4], vel_deseada=puntos[:,4])
 
