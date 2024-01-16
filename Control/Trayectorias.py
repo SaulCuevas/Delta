@@ -20,7 +20,7 @@ dispensador = 1
 pnp = 2
 
 valPWM_soldadura = 50
-max_comp_por_cuadrante = 72
+max_comp_por_cuadrante = 54
 max_IC_por_cuadrante = 2
 
 home_pos = np.array([0.0, 0.0, 200.0])
@@ -29,6 +29,7 @@ home_pos = np.array([0.0, 0.0, 200.0])
 offset_cam = np.array([0.0, 0.0, 0.0])
 offset_dispensador = np.array([-60.0, 0.0, 0.0])
 offset_pnp = np.array([53.0, 0.0, 0.0])
+pos_disco = np.array([45.00, -65.00, 187.00])
 
 def getStep():
     return step
@@ -631,7 +632,7 @@ def calc_trayectorias_ps_no_t(func, operaciones : np.single, Ps : np.single, vel
         for x in range(ts.shape[1]):
             if ( index_soldaduras.shape[0]>0 ):
                 if(x==index_soldaduras[cont_sold]):
-                    f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'S ' + '%i' % valPWM_soldadura + ' ' + "%i" % int(pulsos_soldaduras[cont_sold]*1000000) + '\n')
+                    f.writelines("%.4f" % (ts[0][x-1]+0.1) + ' ' + 'S ' + '%i' % valPWM_soldadura + ' ' + "%i" % int(pulsos_soldaduras[cont_sold]*10000) + '\n')
                     if(cont_sold<len(index_soldaduras)-1): cont_sold += 1
             if ( index_valvula_on.shape[0]>0 ):
                 if(x==index_valvula_on[cont_valv_on]):
@@ -777,42 +778,42 @@ def soldaduraclass_to_puntos(soldadura_lista, altura_pcb):
     puntos[-1,:] = np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500])   # HOME
     return puntos
 
-def componentesclass_to_puntos2(pnp_lista_sin_IC, IC_lista, altura_pcb, altura_pnp, offsets_lista):
+def componentesclass_to_puntos2(pnp_lista_sin_IC, IC_lista, altura_pcb, altura_pnp, offsets_lista, offset_pcb_x, offset_pcb_y):
     pnp_lista = np.append(pnp_lista_sin_IC, IC_lista, axis=0)
     i = 10
     puntos = np.zeros((len(pnp_lista)*i+1,5), dtype=float)
     puntos[0,:] = np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500]) # HOME
     for x in range(len(pnp_lista)):
-        offset_x = offsets_lista[x,0]
-        offset_y = offsets_lista[x,1]
-        puntos[x*i+1:x*i+i+1,:] = [np.array([movimiento, offset_x-offset_pnp[0], offset_y-offset_pnp[1], altura_pcb-10-offset_pnp[2], 25]), # pos de componente(x,y) + 10 mm de altura
+        offset_x = offsets_lista[x][0]
+        offset_y = offsets_lista[x][1]
+        puntos[x*i+1:x*i+i+1,:] = [np.array([movimiento, offset_x-offset_pnp[0], offset_y-offset_pnp[1], altura_pnp-10-offset_pnp[2], 25]), # pos de componente(x,y) + 10 mm de altura
                             np.array([valvula_on, 0, 0, 0, 0]), # enciende la valvula
                             np.array([movimiento, offset_x-offset_pnp[0], offset_y-offset_pnp[1], altura_pnp-offset_pnp[2], 25]), # baja a componente(x,y)
-                            np.array([movimiento, offset_x-offset_pnp[0], offset_y-offset_pnp[1], altura_pcb-10-offset_pnp[2], 25]), # sube
+                            np.array([movimiento, offset_x-offset_pnp[0], offset_y-offset_pnp[1], altura_pnp-10-offset_pnp[2], 25]), # sube
                             np.array([manipulador, math.radians(pnp_lista[x].angulo), 0, 0, 0]), # gira el componente SMD al angulo deseado
-                            np.array([movimiento, pnp_lista[x].x-offset_pnp[0], pnp_lista[x].y-offset_pnp[1], altura_pcb-10-offset_pnp[2], 25]), # pos de componente en pcb
-                            np.array([movimiento, pnp_lista[x].x-offset_pnp[0], pnp_lista[x].y-offset_pnp[1], altura_pcb-offset_pnp[2], 25]), # baja
+                            np.array([movimiento, pnp_lista[x].x-offset_pnp[0]+offset_pcb_x, pnp_lista[x].y-offset_pnp[1]+offset_pcb_y, altura_pnp-10-offset_pnp[2], 25]), # pos de componente en pcb
+                            np.array([movimiento, pnp_lista[x].x-offset_pnp[0]+offset_pcb_x, pnp_lista[x].y-offset_pnp[1]+offset_pcb_y, altura_pcb-offset_pnp[2], 25]), # baja
                             np.array([valvula_off, 0, 0, 0, 0]), # apaga la valvula
-                            np.array([movimiento, pnp_lista[x].x-offset_pnp[0], pnp_lista[x].y-offset_pnp[1], altura_pcb-10-offset_pnp[2], 50]), # sube
+                            np.array([movimiento, pnp_lista[x].x-offset_pnp[0]+offset_pcb_x, pnp_lista[x].y-offset_pnp[1]+offset_pcb_y, altura_pnp-10-offset_pnp[2], 50]), # sube
                             np.array([manipulador, 0, 0, 0, 0])] # gira a la posicion cero 
 
     puntos[-1,4] = 500.0
     puntos = np.r_[puntos, np.array([movimiento, home_pos[0], home_pos[1], home_pos[2], 500]).reshape(1,5)]
-    veces = math.floor( len(pnp_lista_sin_IC) / max_comp_por_cuadrante ) # veces que va a girar el inventario
-    veces_IC = math.floor( len(IC_lista) / max_IC_por_cuadrante ) # veces que va a girar el inventario
+    veces = math.floor( len(pnp_lista) / max_comp_por_cuadrante ) # veces que va a girar el inventario
+    # veces_IC = math.floor( len(IC_lista) / max_IC_por_cuadrante ) # veces que va a girar el inventario
     giro = np.array([inventario, 0.0, 0, 0, 0])
     puntos = np.insert(puntos, 1, giro, axis=0) 
     for x in range(veces):
         giro = np.array([inventario, math.pi/2*(x+1), 0, 0, 0])
         puntos = np.insert(puntos, max_comp_por_cuadrante*(x+1)*i + x + 1 + 1, giro, axis=0) 
     giro = np.array([inventario, 0.0, 0, 0, 0])
-    puntos = np.insert(puntos, len(pnp_lista_sin_IC)*i + veces + 1 + 1, giro, axis=0)
-    for x in range(veces_IC):
-        giro = np.array([inventario, math.pi/2*(x+1), 0, 0, 0])
-        puntos = np.insert(puntos, len(pnp_lista_sin_IC)*i + veces + 1 + max_IC_por_cuadrante*(x+1)*i + x + 1 + 1, giro, axis=0)
-    if (veces_IC > 0) or (veces > 0):
-        giro = np.array([inventario, 0.0, 0, 0, 0]).reshape(1,5)
-        puntos = np.r_[puntos, giro]
+    puntos = np.insert(puntos, len(pnp_lista)*i + veces + 1 + 1, giro, axis=0)
+    # for x in range(veces_IC):
+    #     giro = np.array([inventario, math.pi/2*(x+1), 0, 0, 0])
+    #     puntos = np.insert(puntos, len(pnp_lista_sin_IC)*i + veces + 1 + max_IC_por_cuadrante*(x+1)*i + x + 1 + 1, giro, axis=0)
+    # if (veces_IC > 0) or (veces > 0):
+    #     giro = np.array([inventario, 0.0, 0, 0, 0]).reshape(1,5)
+    #     puntos = np.r_[puntos, giro]
     return puntos
 
 def componentesclass_to_puntos(pnp_lista, altura_pcb, altura_pnp):

@@ -3,7 +3,7 @@ import numpy as np
 import math
 
 pixeles_por_mm = 42.3216
-pos_disco = [45.00, 65.00, 187.00] 
+pos_disco = [45.00, -65.00, 187.00] 
 
 def ResizeWithAspectRatio(image, width=None, height=None, inter=cv2.INTER_AREA):
     dim = None
@@ -64,17 +64,17 @@ def genMaskSMD(img, h, w):
     kernel = np.ones((17, 17), np.uint8) 
     mask_SMD = cv2.erode(mask_SMD, kernel)
 
-    cv2.imshow("smd", ResizeWithAspectRatio(mask_SMD, height=960))
-    cv2.imshow("smd2", ResizeWithAspectRatio(mask_SMD_2, height=960))
+    # cv2.imshow("smd", ResizeWithAspectRatio(mask_SMD, height=960))
+    # cv2.imshow("smd2", ResizeWithAspectRatio(mask_SMD_2, height=960))
 
     mask_SMD = mask_SMD + mask_SMD_2
     kernel = np.ones((31, 31), np.uint8) 
     mask_SMD = cv2.dilate(mask_SMD, kernel)
     mask_SMD = cv2.erode(mask_SMD, kernel)
 
-    cv2.imshow("res", ResizeWithAspectRatio(mask_SMD, height=960))
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow("res", ResizeWithAspectRatio(mask_SMD, height=960))
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     
     return mask, mask_SMD
 

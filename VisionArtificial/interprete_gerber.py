@@ -77,7 +77,7 @@ def obtener_soldadura(path : str, _top_bottom : bool):
         pos = (prim.bounding_box[0][0] + (prim.bounding_box[0][1] - prim.bounding_box[0][0]) / 2,
             prim.bounding_box[1][0] + (prim.bounding_box[1][1] - prim.bounding_box[1][0]) / 2)
         area_sqr = math.sqrt(math.sqrt(prim.bounding_box[0][1] - prim.bounding_box[0][0]) * (prim.bounding_box[1][1] - prim.bounding_box[1][0]))
-        pulso = round(area_sqr * 0.25, 3) # Se multiplica el area por un factor para convertir en segundos para el pulso de motor
+        pulso = round(area_sqr, 3) # Se multiplica el area por un factor para convertir en segundos para el pulso de motor
         soldadura_lista.append(soldadura_class(round(pos[0], 4), round(pos[1], 4), pulso))
     return soldadura_lista
 

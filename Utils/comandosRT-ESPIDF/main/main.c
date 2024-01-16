@@ -186,15 +186,17 @@ float PWMvalue[6] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 const float zeros[6] = {3.433049, 4.424001, 2.911879, 0.0, 0.0, 0.4238};
 float amplitud = 0.0;
 float periodo = 0.0;
+bool flag_valv = false;
+bool val_valv = true;
 bool flag_mostrar_valores_PID = false;
 bool flag_HOME_realizado = false;
 bool flag_M123_again = false;
 bool flag_control_M1 = false;
-bool flag_control_M1_pos = true;
+bool flag_control_M1_pos = false;
 bool flag_control_M2 = false;
-bool flag_control_M2_pos = true;
+bool flag_control_M2_pos = false;
 bool flag_control_M3 = false;
-bool flag_control_M3_pos = true;
+bool flag_control_M3_pos = false;
 bool flag_lims = false;
 bool flag_control_M4 = false;
 bool flag_control_M5 = false;
@@ -211,6 +213,7 @@ bool flag_control_manual_M7 = false;
 bool flag_brazo = false;
 bool busy = false;
 bool lastbusy = false;
+bool new_command = false;
 uint8_t cont_M123_again = 0;
 
 // Memoria de error
@@ -250,12 +253,12 @@ const float error_min = 0.001;
 // const float Ki_arriba[3] = {16.0,        12.0,   12.0};
 // const float Kd_arriba[3] = {5.8681,    2.5351,    1.2905};
 
-float Kp[6] = {55.3068/3, 54.9594/3,    54.1958/3,    94.6384,    865.5567,   865.5567};
-float Ki[6] = {12.0/2,    12.0/2,       12.0/2,       5.0,        0.0,        0.0};
-float Kd[6] = {1.6972/2,  1.9189/2,     1.7756/2,     10.1249,    57.3356,    57.3356};
+float Kp[6] = {55.3068, 54.9594,    54.1958,    94.6384,    865.5567,   865.5567};
+float Ki[6] = {12.0,    12.0,       12.0,       5.0,        0.0,        0.0};
+float Kd[6] = {1.6972,  1.9189,     1.7756,     10.1249,    57.3356,    57.3356};
 
 float Kp_arriba[3] = {171.6186,   98.6761,   85.2917};
-float Ki_arriba[3] = {25.0,        20.0,   20.0};
+float Ki_arriba[3] = {35.0,        28.0,   28.0};
 float Kd_arriba[3] = {5.8681,    2.5351,    1.2905};
 
 // Variables del PID
@@ -466,37 +469,37 @@ void vTaskControlLoop(void *pvParameters)
     {
         lastTime3 = esp_timer_get_time();
         if (esp_timer_get_time() - lastTime >= sampleTime)
-        {
+        {            
             lastbusy = busy;
-            if (flag_M123_again & !flag_control_M1 & !flag_control_M2 & !flag_control_M3)
-            {
-                flag_control_M1 = true;
-                flag_control_M2 = true;
-                flag_control_M3 = true;
-                cont_M123_again++;
-                if ( cont_M123_again >= 5 )
-                {
-                    flag_M123_again = false;
-                    cont_M123_again = 0;
-                }
-            }
-            if (flag_M123_again | flag_control_M1 | flag_control_M2 | flag_control_M3 | flag_control_M4 | flag_control_M5 | flag_control_M6)
+            if (flag_control_M1_pos | flag_control_M2_pos | flag_control_M3_pos | flag_control_M4 | flag_control_M5 | flag_control_M6 | flag_valv)
             {
                 busy = true;
             }
             else
             {
-                errorI[0] = 0.0;
-                errorI[1] = 0.0;
-                errorI[2] = 0.0;
+                // errorI[0] = 0.0;
+                // errorI[1] = 0.0;
+                // errorI[2] = 0.0;
                 errorI[3] = 0.0;
                 errorI[4] = 0.0;
                 errorI[5] = 0.0;
                 busy = false;
             }
-            if ((lastbusy == true) & (busy == false))
+            if (flag_valv == true)
+            {
+                gpio_set_level(pin3_VIAS, val_valv);
+                flag_valv = false;
+            }
+            // if (flag_M123_again & !flag_control_M1 & !flag_control_M2 & !flag_control_M3)
+            // {
+            //     flag_control_M1 = true;
+            //     flag_control_M2 = true;
+            //     flag_control_M3 = true;
+            // }
+            if ((lastbusy == true) & (busy == false) & (new_command == true))
             {
                 printf("ready\n");
+                new_command = false;
             }
             // if (busy == true)
             // {
@@ -538,10 +541,12 @@ void vTaskControlLoop(void *pvParameters)
 
                     if (fabsf(err_mem_0t / errs_num) < error_min)
                     {
-                        PWMvalue[0] = 0.0;
+                        // PWMvalue[0] = 0.0;
                         // printf("listo M1\n");
-                        setMotor(0, 0.0, PWMChannelIN1_0, PWMChannelIN2_0);
-                        flag_control_M1 = false;
+                        // setMotor(0, 0.0, PWMChannelIN1_0, PWMChannelIN2_0);
+                        // flag_control_M1 = false;
+                        flag_control_M1_pos = false;
+                        setMotor(0, PWMvalue[0], PWMChannelIN1_0, PWMChannelIN2_0);
                     }
                     else
                     {
@@ -589,10 +594,12 @@ void vTaskControlLoop(void *pvParameters)
 
                     if (fabsf(err_mem_1t / errs_num) < error_min)
                     {
-                        PWMvalue[1] = 0.0;
+                        // PWMvalue[1] = 0.0
                         // printf("listo M2\n");
-                        setMotor(1, 0.0, PWMChannelIN1_1, PWMChannelIN2_1);
-                        flag_control_M2 = false;
+                        // setMotor(1, 0.0, PWMChannelIN1_1, PWMChannelIN2_1);
+                        // flag_control_M2 = false;
+                        flag_control_M2_pos = false;
+                        setMotor(1, PWMvalue[1], PWMChannelIN1_1, PWMChannelIN2_1);
                     }
                     else
                     {
@@ -640,10 +647,12 @@ void vTaskControlLoop(void *pvParameters)
 
                     if (fabsf(err_mem_2t / errs_num) < error_min)
                     {
-                        PWMvalue[2] = 0.0;
+                        // PWMvalue[2] = 0.0;
                         // printf("listo M3\n");
-                        setMotor(2, 0.0, PWMChannelIN1_2, PWMChannelIN2_2);
-                        flag_control_M3 = false;
+                        // setMotor(2, 0.0, PWMChannelIN1_2, PWMChannelIN2_2);
+                        // flag_control_M3 = false;
+                        flag_control_M3_pos = false;
+                        setMotor(2, PWMvalue[2], PWMChannelIN1_2, PWMChannelIN2_2);
                     }
                     else
                     {
@@ -928,6 +937,7 @@ static void uart_task(void *pvParameters)
 
 void descifrar_comando(uint8_t *data)
 {
+    new_command = true;
     data[strcspn((char *)data, "\n")] = 0;   // Se borra la nueva linea de la string
     printf("echo:%s\n", (char *)data);
     char *token = strtok((char *)data, " "); // Se extrae el primer valor de la string: COMM1+COMM2 ARG1 ARG2 ARG3 ARG4 ARG5 ARG6 ARG7 ARG8 ARG9
@@ -953,6 +963,9 @@ void descifrar_comando(uint8_t *data)
         {
         case 123:
             flag_M123_again = true;
+            flag_control_M1_pos = true;
+            flag_control_M2_pos = true;
+            flag_control_M3_pos = true;
             flag_control_M1 = true;
             flag_control_M2 = true;
             flag_control_M3 = true;
@@ -968,18 +981,21 @@ void descifrar_comando(uint8_t *data)
             break;
         case 1:
             flag_control_M1 = true;
+            flag_control_M1_pos = true;
             qds[0] = args[0];
             dqds[0] = 0.0;
             d2qds[0] = 0.0;
             break;
         case 2:
             flag_control_M2 = true;
+            flag_control_M2_pos = true;
             qds[1] = args[0];
             dqds[1] = 0.0;
             d2qds[1] = 0.0;
             break;
         case 3:
             flag_control_M3 = true;
+            flag_control_M3_pos = true;
             qds[2] = args[0];
             dqds[2] = 0.0;
             d2qds[2] = 0.0;
@@ -1060,6 +1076,31 @@ void descifrar_comando(uint8_t *data)
         break;
     // Mandar un pulso para dispensar soldadura
     case 'S':
+        PWMvalue[0] = 0.0;
+        PWMvalue[1] = 0.0;
+        PWMvalue[2] = 0.0;
+        PWMvalue[3] = 0.0;
+        PWMvalue[4] = 0.0;
+        PWMvalue[5] = 0.0;
+        PWMvalue[6] = 0.0;
+        setMotor(0, 0.0, PWMChannelIN1_0, PWMChannelIN2_0);
+        setMotor(1, 0.0, PWMChannelIN1_1, PWMChannelIN2_1);
+        setMotor(2, 0.0, PWMChannelIN1_2, PWMChannelIN2_2);
+        setMotor(3, 0.0, PWMChannelIN1_3, PWMChannelIN2_3);
+        setMotor(4, 0.0, PWMChannelIN1_4, PWMChannelIN2_4);
+        setMotor(5, 0.0, PWMChannelIN1_5, PWMChannelIN2_5);
+        setMotor(6, 0.0, PWMChannelIN1_6, PWMChannelIN2_6);
+        flag_control_M1 = false;
+        flag_control_M2 = false;
+        flag_control_M3 = false;
+        flag_control_M4 = false;
+        flag_control_M5 = false;
+        flag_control_M6 = false;
+        flag_control_M1_pos = false;
+        flag_control_M2_pos = false;
+        flag_control_M3_pos = false;
+        flag_M123_again = false;
+
         flag_control_manual_M7 = true;
         amplitud = args[0];
         periodo = args[1];
@@ -1124,18 +1165,44 @@ void descifrar_comando(uint8_t *data)
         break;
     // Encender o apagar la valvula de tres vias
     case 'V':
+        PWMvalue[0] = 0.0;
+        PWMvalue[1] = 0.0;
+        PWMvalue[2] = 0.0;
+        PWMvalue[3] = 0.0;
+        PWMvalue[4] = 0.0;
+        PWMvalue[5] = 0.0;
+        PWMvalue[6] = 0.0;
+        setMotor(0, 0.0, PWMChannelIN1_0, PWMChannelIN2_0);
+        setMotor(1, 0.0, PWMChannelIN1_1, PWMChannelIN2_1);
+        setMotor(2, 0.0, PWMChannelIN1_2, PWMChannelIN2_2);
+        setMotor(3, 0.0, PWMChannelIN1_3, PWMChannelIN2_3);
+        setMotor(4, 0.0, PWMChannelIN1_4, PWMChannelIN2_4);
+        setMotor(5, 0.0, PWMChannelIN1_5, PWMChannelIN2_5);
+        setMotor(6, 0.0, PWMChannelIN1_6, PWMChannelIN2_6);
+        flag_control_M1 = false;
+        flag_control_M2 = false;
+        flag_control_M3 = false;
+        flag_control_M4 = false;
+        flag_control_M5 = false;
+        flag_control_M6 = false;
+        flag_control_M1_pos = false;
+        flag_control_M2_pos = false;
+        flag_control_M3_pos = false;
+        flag_M123_again = false;
+
         busy = true;
+        flag_valv = true;
         if (comm2)
         {
-            gpio_set_level(pin3_VIAS, false);
+            val_valv = false;
             // printf("Valvula encendida\n");
         }
         else
         {
-            gpio_set_level(pin3_VIAS, true);
+            val_valv = true;
             // printf("Valvula apagada\n");
         }
-        busy = false;
+        // busy = false;
         break;
     case 'X':
         if (comm2)
@@ -1169,6 +1236,9 @@ void descifrar_comando(uint8_t *data)
         flag_control_M4 = false;
         flag_control_M5 = false;
         flag_control_M6 = false;
+        flag_control_M1_pos = false;
+        flag_control_M2_pos = false;
+        flag_control_M3_pos = false;
         flag_M123_again = false;
         busy = false;
         break;

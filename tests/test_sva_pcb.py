@@ -15,7 +15,7 @@ from matplotlib import pyplot as plt
 path = "tests/Triple oscilador a LEDs v10"
 map_path = "tests/Imagenes/FOTO_20240112_130010.png"
 
-top_bottom = input('¿Es top layer? (Y/N) ')
+# top_bottom = input('¿Es top layer? (Y/N) ')
 
 # if top_bottom == 'Y' or top_bottom == 'y':
 #     _top_bottom = True
@@ -29,10 +29,10 @@ _top_bottom = True
 
 start_time = time.time()
 
-path_r1 = "C:/Users/saulc/Downloads/IMG_20240110_222245.jpg"
-path_r2 = "C:/Users/saulc/Downloads/IMG_20240110_222245.jpg"
-path_r3 = "C:/Users/saulc/Downloads/IMG_20240110_222245.jpg"
-path_r4 = "C:/Users/saulc/Downloads/IMG_20240110_222245.jpg"
+path_r1 = "tests/Imagenes/test.png"
+path_r2 = path_r1
+path_r3 = path_r1
+path_r4 = path_r1
 
 componentes_lista = interprete_gerber.obtener_pnp(path, _top_bottom)
 puntos = SVA_PCB.inicioSVA(path, map_path, _top_bottom, componentes_lista, path_r1, path_r2, path_r3, path_r4)

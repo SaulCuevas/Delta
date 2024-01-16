@@ -7,9 +7,9 @@ from VisionArtificial import interprete_gerber, SVA_SMD
 from Control import Trayectorias
 
 MIN_MATCH_COUNT = 25
-pixeles_por_mm = 10.0
-altura_pcb = 400
-altura_pnp = 380
+pixeles_por_mm = 42.3216
+altura_pcb = 312
+altura_pnp = 292
 
 # herramientas
 camara = 0
@@ -182,7 +182,6 @@ def inicioSVA(path : str, map_path : str, _top_bottom : bool, componentes_lista,
     cv2.imwrite(os.path.join(os.getcwd(), 'temp/output_smd4.png'), smd_img4)
     
     # print(rot_real)
-    # print(offsets_reales)
 
     if(not(_top_bottom)): 
         interprete_gerber.mirror_bottom(path, componentes_lista)
@@ -208,7 +207,7 @@ def inicioSVA(path : str, map_path : str, _top_bottom : bool, componentes_lista,
     puntos_soldadura = Trayectorias.soldaduraclass_to_puntos(soldadura_lista, altura_pcb) 
     herr_pnp = Trayectorias.cambio_herramienta(pnp)
     # puntos_pnp = Trayectorias.componentesclass_to_puntos(componentes_lista, 400, 420)
-    puntos_pnp = Trayectorias.componentesclass_to_puntos2(smd_lista, IC_lista, altura_pcb, altura_pnp, offsets_reales)
+    puntos_pnp = Trayectorias.componentesclass_to_puntos2(smd_lista, IC_lista, altura_pcb, altura_pnp, offsets_reales, offset_x, offset_y)
     herr_cam = Trayectorias.cambio_herramienta(camara)
 
     puntos = np.append(herr_soldadura, puntos_soldadura, axis=0)
