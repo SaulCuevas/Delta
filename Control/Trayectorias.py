@@ -759,7 +759,8 @@ def plot_trayectorias_IK(ts, qds, dqds, d2qds, pds, dpds, d2pds):
     fig = plt.figure()
     ax = plt.axes(projection='3d')
 
-    ax.plot3D(Ps_FK[:,0], Ps_FK[:,1], Ps_FK[:,2], 'gray', marker='.')
+    # ax.plot3D(Ps_FK[:,0], Ps_FK[:,1], Ps_FK[:,2], 'gray', marker='.')
+    ax.plot3D(Ps_FK[:,0], Ps_FK[:,1], Ps_FK[:,2], 'gray')
 
     ax.set_xlim(-250, 250); ax.set_ylim(-250, 250); ax.set_zlim(167.1977, 522.4509); ax.invert_zaxis()
     ax.set_xlabel('x'); ax.set_ylabel('y'); ax.set_zlabel('z'); ax.set_title('Trayectoria generada (interp en ps)')
